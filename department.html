@@ -44,7 +44,7 @@
                 </div>
                 <div class="theme-toggle" id="themeToggle" title="Переключить тему">
                     <div class="toggle-knob" id="toggleKnob">
-                        <span class="icon-sun">☀️</span>
+                        <span class="icon-sun">️</span>
                         <span class="icon-moon">🌙</span>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
             </div>
 
             <button class="btn-continue" id="continueBtn" disabled>Продолжить</button>
-            <a href="index.html" class="btn-back">← Вернуться назад</a>
+            <button class="btn-back" id="backBtn">← Вернуться назад</button>
         </div>
     </div>
 
@@ -97,7 +97,8 @@
         // Активация кнопки "Продолжить" при выборе подразделения
         const departmentSelect = document.getElementById('departmentSelect');
         const continueBtn = document.getElementById('continueBtn');
-        
+        const backBtn = document.getElementById('backBtn');
+
         if (departmentSelect && continueBtn) {
             departmentSelect.addEventListener('change', () => {
                 continueBtn.disabled = !departmentSelect.value;
@@ -108,6 +109,13 @@
                 if (departmentSelect.value) {
                     window.location.href = departmentSelect.value;
                 }
+            });
+        }
+
+        // Кнопка "Вернуться назад"
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
             });
         }
     </script>
