@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +83,7 @@
                 </select>
             </div>
 
-            <a href="#" class="btn-continue" id="continueBtn" style="pointer-events: none; opacity: 0.5;">Продолжить</a>
+            <button class="btn-continue" id="continueBtn" disabled>Продолжить</button>
             <a href="index.html" class="btn-back">← Вернуться назад</a>
         </div>
     </div>
@@ -99,14 +100,13 @@
         
         if (departmentSelect && continueBtn) {
             departmentSelect.addEventListener('change', () => {
+                continueBtn.disabled = !departmentSelect.value;
+            });
+
+            // Переход на страницу чата
+            continueBtn.addEventListener('click', () => {
                 if (departmentSelect.value) {
-                    continueBtn.href = departmentSelect.value;
-                    continueBtn.style.pointerEvents = 'auto';
-                    continueBtn.style.opacity = '1';
-                } else {
-                    continueBtn.href = '#';
-                    continueBtn.style.pointerEvents = 'none';
-                    continueBtn.style.opacity = '0.5';
+                    window.location.href = departmentSelect.value;
                 }
             });
         }
