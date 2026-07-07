@@ -2264,3 +2264,81 @@ body.theme-dark .transition-strip {
 #page-transition-overlay.opening .transition-strip:nth-child(10) { transition-delay: 100ms; }
 #page-transition-overlay.opening .transition-strip:nth-child(11) { transition-delay: 50ms; }
 #page-transition-overlay.opening .transition-strip:nth-child(12) { transition-delay: 0ms; }
+
+/* ===== ВОЛНЫ: ТОЛЬКО МОБИЛЬНАЯ ВЕРСИЯ ===== */
+
+/* На десктопе скрываем волны */
+@media (min-width: 769px) {
+    .wave-divider {
+        display: none !important;
+    }
+}
+
+/* На мобильных показываем и стилизуем */
+@media (max-width: 768px) {
+    .wave-divider {
+        margin-top: 0 !important;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wave-divider svg {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 200%;
+        height: 100%;
+        animation: waveFloat 8s ease-in-out infinite;
+    }
+
+    /* Светлая тема — розово-оранжевые волны */
+    body.theme-light .wave-path-1 {
+        fill: url(#waveGradientLight1);
+        animation: wavePath1 6s ease-in-out infinite;
+    }
+
+    body.theme-light .wave-path-2 {
+        fill: url(#waveGradientLight2);
+        animation: wavePath2 7s ease-in-out infinite;
+    }
+
+    /* Тёмная тема — фиолетово-синие волны */
+    body.theme-dark .wave-path-1 {
+        fill: url(#waveGradientDark1);
+        animation: wavePath1 6s ease-in-out infinite;
+    }
+
+    body.theme-dark .wave-path-2 {
+        fill: url(#waveGradientDark2);
+        animation: wavePath2 7s ease-in-out infinite;
+    }
+}
+
+/* Анимация плавучести волн */
+@keyframes waveFloat {
+    0%, 100% {
+        transform: translateX(0) translateY(0);
+    }
+    50% {
+        transform: translateX(-25%) translateY(-10px);
+    }
+}
+
+@keyframes wavePath1 {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes wavePath2 {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
