@@ -71,11 +71,9 @@
             left: -150px;
             width: 120px;
             height: 60px;
-            /* Анимация поезда — 2.5 секунды */
             animation: trainMove 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
-        /* Когда поезд доехал — останавливаем колёса */
         .train.arrived .wheel {
             animation-play-state: paused;
         }
@@ -135,12 +133,13 @@
             animation: wheelSpin 0.3s linear infinite;
         }
 
+        /* Поезд едет ОТ левого края ДО правого края */
         @keyframes trainMove {
             0% {
                 left: -150px;
             }
             100% {
-                left: calc(50% - 60px);
+                left: calc(100% - 120px); /* До правого края */
             }
         }
 
@@ -170,6 +169,7 @@
             text-align: center;
             opacity: 0;
             transform: translateY(20px);
+            /* Каждая цитата показывается 0.5 секунды, потом плавно исчезает */
             animation: quoteFade 2.5s ease-in-out infinite;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             padding: 0 20px;
@@ -180,19 +180,25 @@
             color: #2d2d4a;
         }
 
+        /* Цитаты сменяются по очереди без наложения */
         .quote:nth-child(1) { animation-delay: 0s; }
         .quote:nth-child(2) { animation-delay: 0.625s; }
         .quote:nth-child(3) { animation-delay: 1.25s; }
         .quote:nth-child(4) { animation-delay: 1.875s; }
 
+        /* Исправленная анимация цитат */
         @keyframes quoteFade {
             0%, 100% {
                 opacity: 0;
                 transform: translateY(20px);
             }
-            25%, 75% {
+            10%, 40% {
                 opacity: 1;
                 transform: translateY(0);
+            }
+            50%, 90% {
+                opacity: 0;
+                transform: translateY(-20px);
             }
         }
 
@@ -216,7 +222,6 @@
             background: linear-gradient(90deg, #ed1c24, #f7941d, #fbb03b);
             border-radius: 3px;
             width: 0%;
-            /* Заполняется синхронно с поездом — 2.5 секунды */
             animation: progressFill 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             box-shadow: 0 0 10px rgba(237, 28, 36, 0.5);
         }
@@ -339,10 +344,8 @@
         const train = document.getElementById('train');
         
         train.addEventListener('animationend', function() {
-            // Поезд остановился — добавляем класс для остановки колёс
             train.classList.add('arrived');
             
-            // Небольшая пауза после остановки (500ms) — как будто двери открываются
             setTimeout(() => {
                 window.location.href = targetPage;
             }, 500);
