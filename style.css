@@ -2346,3 +2346,227 @@ body.theme-dark .transition-strip {
         opacity: 0.9;
     }
 }
+
+/* ===== АНИМАЦИЯ ПОЕЗДА В ТУННЕЛЕ (только мобильные) ===== */
+
+@media (max-width: 768px) {
+    .description {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Верхний туннель */
+    .tunnel-animation-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        z-index: 1;
+    }
+
+    .tunnel-top {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tunnel-entrance {
+        position: absolute;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(180deg, 
+            rgba(10, 10, 26, 0.95) 0%, 
+            rgba(10, 10, 26, 0.8) 50%, 
+            rgba(10, 10, 26, 0.95) 100%);
+        border-radius: 30px;
+        box-shadow: 
+            inset 0 0 20px rgba(0, 0, 0, 0.8),
+            0 0 15px rgba(120, 100, 255, 0.3);
+        overflow: hidden;
+    }
+
+    body.theme-light .tunnel-entrance {
+        background: linear-gradient(180deg, 
+            rgba(45, 45, 74, 0.95) 0%, 
+            rgba(45, 45, 74, 0.8) 50%, 
+            rgba(45, 45, 74, 0.95) 100%);
+        box-shadow: 
+            inset 0 0 20px rgba(0, 0, 0, 0.8),
+            0 0 15px rgba(237, 28, 36, 0.3);
+    }
+
+    .tunnel-dark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 40px;
+        background: #000;
+        border-radius: 20px;
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 1);
+    }
+
+    /* Поезд сверху */
+    .train-top {
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        z-index: 2;
+        animation: trainTopMove 6s ease-in-out infinite;
+    }
+
+    /* Нижний туннель */
+    .tunnel-animation-bottom {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        z-index: 1;
+    }
+
+    .tunnel-bottom {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Поезд снизу */
+    .train-bottom {
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        z-index: 2;
+        animation: trainBottomMove 6s ease-in-out infinite;
+    }
+
+    /* Стили поезда */
+    .train-car {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ed1c24, #f7941d);
+        border-radius: 12px 12px 8px 8px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(237, 28, 36, 0.4);
+    }
+
+    body.theme-dark .train-car {
+        background: linear-gradient(135deg, #7864ff, #64c8ff);
+        box-shadow: 0 4px 15px rgba(120, 100, 255, 0.4);
+    }
+
+    .train-car::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 8px;
+        right: 8px;
+        height: 16px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
+
+    .train-car::after {
+        content: 'М';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        font-weight: 900;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .train-wheels {
+        position: absolute;
+        bottom: -6px;
+        left: 15px;
+        right: 15px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .wheel {
+        width: 12px;
+        height: 12px;
+        background: #333;
+        border-radius: 50%;
+        border: 2px solid #666;
+        animation: wheelSpin 0.3s linear infinite;
+    }
+
+    /* Анимации поездов */
+    @keyframes trainTopMove {
+        0%, 15% {
+            /* Поезд появляется из туннеля сверху */
+            top: 40px;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        20%, 35% {
+            /* Поезд движется вправо */
+            top: 15px;
+            opacity: 1;
+            transform: scale(1) translateX(-50vw);
+        }
+        40%, 55% {
+            /* Поезд уезжает вправо за экран */
+            top: 15px;
+            opacity: 1;
+            transform: scale(1) translateX(50vw);
+        }
+        60%, 100% {
+            /* Поезд скрыт */
+            top: 40px;
+            opacity: 0;
+            transform: scale(0.8) translateX(50vw);
+        }
+    }
+
+    @keyframes trainBottomMove {
+        0%, 50% {
+            /* Поезд скрыт */
+            bottom: 40px;
+            opacity: 0;
+            transform: scale(0.8) translateX(-50vw);
+        }
+        55%, 70% {
+            /* Поезд появляется из туннеля снизу */
+            bottom: 15px;
+            opacity: 1;
+            transform: scale(1) translateX(-50vw);
+        }
+        75%, 90% {
+            /* Поезд движется вправо */
+            bottom: 15px;
+            opacity: 1;
+            transform: scale(1) translateX(50vw);
+        }
+        95%, 100% {
+            /* Поезд заезжает в туннель */
+            bottom: 40px;
+            opacity: 0;
+            transform: scale(0.8) translateX(50vw);
+        }
+    }
+
+    @keyframes wheelSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Сдвигаем контент, чтобы освободить место для поездов */
+    .description-inner {
+        margin-top: 80px;
+        margin-bottom: 80px;
+    }
+}
