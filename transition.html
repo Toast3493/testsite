@@ -73,7 +73,7 @@
             left: -150px;
             width: 120px;
             height: 60px;
-            animation: trainMove 2s ease-in-out forwards;
+            animation: trainMove 2.5s ease-in-out forwards;
         }
 
         .train-car {
@@ -170,7 +170,7 @@
             text-align: center;
             opacity: 0;
             transform: translateY(20px);
-            animation: quoteFade 4s ease-in-out infinite;
+            animation: quoteFade 3.5s ease-in-out infinite;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             padding: 0 20px;
             width: 100%;
@@ -181,9 +181,9 @@
         }
 
         .quote:nth-child(1) { animation-delay: 0s; }
-        .quote:nth-child(2) { animation-delay: 1s; }
-        .quote:nth-child(3) { animation-delay: 2s; }
-        .quote:nth-child(4) { animation-delay: 3s; }
+        .quote:nth-child(2) { animation-delay: 0.875s; }
+        .quote:nth-child(3) { animation-delay: 1.75s; }
+        .quote:nth-child(4) { animation-delay: 2.625s; }
 
         @keyframes quoteFade {
             0%, 100% {
@@ -216,7 +216,7 @@
             background: linear-gradient(90deg, #ed1c24, #f7941d, #fbb03b);
             border-radius: 3px;
             width: 0%;
-            animation: progressFill 1.2s ease-out forwards;
+            animation: progressFill 3s ease-out forwards;
             box-shadow: 0 0 10px rgba(237, 28, 36, 0.5);
         }
 
@@ -290,7 +290,7 @@
             position: absolute;
             border-radius: 50%;
             transform: scale(0);
-            animation: rippleEffect 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation: rippleEffect 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             opacity: 0.1;
         }
 
@@ -327,7 +327,7 @@
         <div class="floating-icon">❤️</div>
         <div class="floating-icon">🤝</div>
         <div class="floating-icon">⭐</div>
-        <div class="floating-icon">💪</div>
+        <div class="floating-icon"></div>
     </div>
 
     <!-- Основной контент -->
@@ -376,7 +376,7 @@
             } else {
                 window.location.href = 'index.html';
             }
-        }, 1200);
+        }, 3500);
     </script>
 </body>
 </html>
