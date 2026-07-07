@@ -2358,10 +2358,10 @@ body.theme-dark .transition-strip {
     /* Верхний туннель */
     .tunnel-animation-top {
         position: absolute;
-        top: 0;
+        top: 20px;
         left: 0;
         width: 100%;
-        height: 80px;
+        height: 70px;
         z-index: 1;
     }
 
@@ -2369,9 +2369,6 @@ body.theme-dark .transition-strip {
         position: relative;
         width: 100%;
         height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .tunnel-entrance {
@@ -2387,6 +2384,8 @@ body.theme-dark .transition-strip {
             inset 0 0 20px rgba(0, 0, 0, 0.8),
             0 0 15px rgba(120, 100, 255, 0.3);
         overflow: hidden;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     body.theme-light .tunnel-entrance {
@@ -2417,16 +2416,18 @@ body.theme-dark .transition-strip {
         width: 100px;
         height: 50px;
         z-index: 2;
-        animation: trainTopMove 6s ease-in-out infinite;
+        top: 10px;
+        left: -150px;
+        animation: trainMove 8s linear infinite;
     }
 
     /* Нижний туннель */
     .tunnel-animation-bottom {
         position: absolute;
-        bottom: 0;
+        bottom: 20px;
         left: 0;
         width: 100%;
-        height: 80px;
+        height: 70px;
         z-index: 1;
     }
 
@@ -2434,9 +2435,6 @@ body.theme-dark .transition-strip {
         position: relative;
         width: 100%;
         height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     /* Поезд снизу */
@@ -2445,7 +2443,10 @@ body.theme-dark .transition-strip {
         width: 100px;
         height: 50px;
         z-index: 2;
-        animation: trainBottomMove 6s ease-in-out infinite;
+        bottom: 10px;
+        left: -150px;
+        animation: trainMove 8s linear infinite;
+        animation-delay: 4s;
     }
 
     /* Стили поезда */
@@ -2504,58 +2505,21 @@ body.theme-dark .transition-strip {
         animation: wheelSpin 0.3s linear infinite;
     }
 
-    /* Анимации поездов */
-    @keyframes trainTopMove {
-        0%, 15% {
-            /* Поезд появляется из туннеля сверху */
-            top: 40px;
+    /* Упрощённая анимация поезда */
+    @keyframes trainMove {
+        0% {
+            left: -150px;
             opacity: 0;
-            transform: scale(0.8);
         }
-        20%, 35% {
-            /* Поезд движется вправо */
-            top: 15px;
+        5% {
             opacity: 1;
-            transform: scale(1) translateX(-50vw);
         }
-        40%, 55% {
-            /* Поезд уезжает вправо за экран */
-            top: 15px;
+        95% {
             opacity: 1;
-            transform: scale(1) translateX(50vw);
         }
-        60%, 100% {
-            /* Поезд скрыт */
-            top: 40px;
+        100% {
+            left: calc(100vw + 50px);
             opacity: 0;
-            transform: scale(0.8) translateX(50vw);
-        }
-    }
-
-    @keyframes trainBottomMove {
-        0%, 50% {
-            /* Поезд скрыт */
-            bottom: 40px;
-            opacity: 0;
-            transform: scale(0.8) translateX(-50vw);
-        }
-        55%, 70% {
-            /* Поезд появляется из туннеля снизу */
-            bottom: 15px;
-            opacity: 1;
-            transform: scale(1) translateX(-50vw);
-        }
-        75%, 90% {
-            /* Поезд движется вправо */
-            bottom: 15px;
-            opacity: 1;
-            transform: scale(1) translateX(50vw);
-        }
-        95%, 100% {
-            /* Поезд заезжает в туннель */
-            bottom: 40px;
-            opacity: 0;
-            transform: scale(0.8) translateX(50vw);
         }
     }
 
@@ -2566,7 +2530,7 @@ body.theme-dark .transition-strip {
 
     /* Сдвигаем контент, чтобы освободить место для поездов */
     .description-inner {
-        margin-top: 80px;
-        margin-bottom: 80px;
+        margin-top: 100px;
+        margin-bottom: 100px;
     }
 }
