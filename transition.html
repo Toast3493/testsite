@@ -133,13 +133,12 @@
             animation: wheelSpin 0.3s linear infinite;
         }
 
-        /* Поезд едет ОТ левого края ДО правого края */
         @keyframes trainMove {
             0% {
                 left: -150px;
             }
             100% {
-                left: calc(100% - 120px); /* До правого края */
+                left: calc(100% - 120px);
             }
         }
 
@@ -148,64 +147,91 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ===== СМЕНЯЮЩИЕСЯ ЦИТАТЫ ===== */
-        .quotes-container {
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            max-width: 500px;
-        }
-
+        /* ===== ЦИТАТЫ В РАЗНЫХ МЕСТАХ ===== */
         .quote {
             position: absolute;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #fff;
-            text-align: center;
             opacity: 0;
-            transform: translateY(20px);
-            /* Каждая цитата показывается 0.5 секунды, потом плавно исчезает */
-            animation: quoteFade 2.5s ease-in-out infinite;
+            transform: scale(0.8);
+            animation: quoteAppear 2.5s ease-in-out infinite;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            padding: 0 20px;
-            width: 100%;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 250px;
+            text-align: center;
         }
 
         body.theme-light .quote {
             color: #2d2d4a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(237, 28, 36, 0.2);
         }
 
-        /* Цитаты сменяются по очереди без наложения */
-        .quote:nth-child(1) { animation-delay: 0s; }
-        .quote:nth-child(2) { animation-delay: 0.625s; }
-        .quote:nth-child(3) { animation-delay: 1.25s; }
-        .quote:nth-child(4) { animation-delay: 1.875s; }
+        body.theme-dark .quote {
+            background: rgba(120, 100, 255, 0.15);
+            border: 1px solid rgba(120, 100, 255, 0.3);
+        }
 
-        /* Исправленная анимация цитат */
-        @keyframes quoteFade {
+        /* Цитата 1 - справа сверху */
+        .quote:nth-child(1) {
+            top: 15%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        /* Цитата 2 - слева снизу */
+        .quote:nth-child(2) {
+            bottom: 20%;
+            left: 8%;
+            animation-delay: 0.625s;
+        }
+
+        /* Цитата 3 - слева сверху */
+        .quote:nth-child(3) {
+            top: 25%;
+            left: 12%;
+            animation-delay: 1.25s;
+        }
+
+        /* Цитата 4 - справа снизу */
+        .quote:nth-child(4) {
+            bottom: 15%;
+            right: 8%;
+            animation-delay: 1.875s;
+        }
+
+        @keyframes quoteAppear {
             0%, 100% {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: scale(0.8) translateY(10px);
             }
-            10%, 40% {
+            15%, 35% {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1) translateY(0);
             }
-            50%, 90% {
+            50%, 85% {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: scale(0.8) translateY(-10px);
             }
         }
 
-        /* ===== ПРОГРЕСС-БАР ===== */
-        .progress-container {
+        /* ===== ПРОГРЕСС-БАР И ТЕКСТ ===== */
+        .loading-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
             width: 100%;
             max-width: 400px;
+        }
+
+        .progress-container {
+            width: 100%;
             height: 6px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 3px;
@@ -234,6 +260,39 @@
         @keyframes progressFill {
             0% { width: 0%; }
             100% { width: 100%; }
+        }
+
+        .station-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 0.5px;
+            animation: textPulse 2.5s ease-in-out infinite;
+        }
+
+        body.theme-light .station-text {
+            color: #5a5a7a;
+        }
+
+        .station-text span {
+            color: #ed1c24;
+            font-weight: 700;
+        }
+
+        body.theme-dark .station-text span {
+            color: #64c8ff;
+        }
+
+        @keyframes textPulse {
+            0%, 100% {
+                opacity: 0.6;
+                transform: scale(0.98);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
         }
 
         /* ===== ПАРЯЩИЕ ИКОНКИ ===== */
@@ -316,17 +375,18 @@
             </div>
         </div>
 
-        <!-- Сменяющиеся цитаты -->
-        <div class="quotes-container">
-            <div class="quote">Профсоюз — это сила единства</div>
-            <div class="quote">Вместе мы можем больше</div>
-            <div class="quote">Поддержка и взаимопомощь</div>
-            <div class="quote">Каждая история имеет значение</div>
-        </div>
+        <!-- Цитаты в разных местах -->
+        <div class="quote">Профсоюз — это сила единства</div>
+        <div class="quote">Вместе мы можем больше</div>
+        <div class="quote">Поддержка и взаимопомощь</div>
+        <div class="quote">Каждая история имеет значение</div>
 
-        <!-- Прогресс-бар -->
-        <div class="progress-container">
-            <div class="progress-bar"></div>
+        <!-- Прогресс-бар и текст -->
+        <div class="loading-wrapper">
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="station-text">Следующая станция: <span>"Профсоюз"</span></div>
         </div>
     </div>
 
