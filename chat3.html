@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ППО Службы движения - Никитина О.Н.</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="theme-light" data-chat="3">
+
+    <!-- Фоновые элементы -->
+    <div class="bg-light">
+        <div class="geo-wheel wheel1"></div>
+        <div class="geo-wheel wheel2"></div>
+        <div class="geo-wheel wheel3"></div>
+        <div class="geo-shape triangle1"></div>
+        <div class="geo-shape triangle2"></div>
+    </div>
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+    <div class="blob blob4"></div>
+    <div class="bubbles" id="bubbles"></div>
+    <div class="glow-orb orb1"></div>
+    <div class="glow-orb orb2"></div>
+    <div class="glow-orb orb3"></div>
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Шапка -->
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/Toast3493/Toast3493.github.io/main/logo-dark.png" alt="Логотип" class="logo logo-light">
+                    <img src="https://raw.githubusercontent.com/Toast3493/Toast3493.github.io/main/logo-light.png" alt="Логотип" class="logo logo-dark">
+                </div>
+                <div class="theme-toggle" id="themeToggle" title="Переключить тему">
+                    <div class="toggle-knob" id="toggleKnob">
+                        <span class="icon-sun">☀️</span>
+                        <span class="icon-moon">🌙</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <nav id="nav">
+                    <a href="transition.html?to=department.html" class="tab1">ГУП "Московский метрополитен"</a>
+                    <a class="tab2 fake-tab" data-msg="Скоро будет доступно ✨">ОАО "РЖД"</a>
+                    <a href="https://rosprofzhel.ru/" target="_blank" class="rospofzhel-link-mobile"> Роспрофжел</a>
+                </nav>
+                <a href="https://rosprofzhel.ru/" target="_blank" class="rospofzhel-link">Роспрофжел</a>
+                <div class="burger" id="burger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ЧАТ 3 -->
+    <div class="chat-section visible" id="chatSection3">
+        <div class="chat-container">
+            <div class="person-card">
+                <img src="https://raw.githubusercontent.com/Toast3493/Toast3493.github.io/main/PPODvij.png" alt="Фото" class="person-photo">
+                <div class="person-name">Никитина Ольга Николаевна</div>
+            </div>
+
+            <div class="chat-right">
+                <button class="toggle-btn" id="toggleInfo3">👤 Показать информацию</button>
+                <div class="hidden-section" id="infoSection3">
+                    <div class="person-card" style="margin-bottom: 16px;">
+                        <div class="info-content collapsed" id="infoContent3">
+                            <div class="person-description">
+                                <p>С 1995 года посвятила свою жизнь метрополитену. Начинала с профессии, которую хорошо знала и любила, — организация перевозок. И даже став председателем ППО в 2020 году, не перестала смотреть на свою работу глазами человека, который ежедневно понимает, насколько важен труд каждого сотрудника.</p>
+                                <p style="margin-top: 16px;">Признаюсь: когда раздается звонок и в трубке звучат слова: «Мы хотим вас поблагодарить», первая мысль невольно тревожная — значит, что-то случилось. Но когда оказывается, что человек звонит лишь для того, чтобы сказать простое человеческое «спасибо», это всегда становится неожиданностью.</p>
+                                <p style="margin-top: 16px;">Профсоюз живет ожиданиями людей. Их надеждами, просьбами, переживаниями. И именно такие слова благодарности напоминают, ради чего мы работаем. Они вселяют веру в то, что наш труд действительно нужен, что мы не зря вкладываем в него силы, время и сердце.</p>
+                                <p style="margin-top: 16px;">Именно в такие моменты приходит самое ценное чувство — понимание, что за каждой решенной проблемой, за каждой поддержкой и каждым добрым делом стоят люди, которым стало немного легче. А значит, работа продолжается не напрасно.</p>
+                            </div>
+                        </div>
+                        <button class="show-more-btn" onclick="toggleInfo('3')">Показать ещё ↓</button>
+                    </div>
+                </div>
+
+                <div class="chat-header">Пожелания и благодарности</div>
+
+                <button class="toggle-btn" id="toggleChat3">💬 Добавить сообщение</button>
+                <div class="hidden-section" id="chatInputSection3">
+                    <div class="author-input-wrapper">
+                        <input type="text" class="author-input" id="authorInput3" placeholder="Ваше имя (необязательно — будет 'Аноним')">
+                    </div>
+                    <div class="emoji-input-row">
+                        <div class="message-input-wrapper">
+                            <textarea class="message-input" id="messageInput3" placeholder="Напишите ваше пожелание или благодарность..."></textarea>
+                        </div>
+                        <button class="emoji-btn" data-chat="3" title="Эмодзи">😊</button>
+                    </div>
+                    <button class="btn-send" data-chat="3">Отправить сообщение</button>
+                </div>
+
+                <div class="messages-divider"></div>
+
+                <div class="messages-list" id="messagesList3">
+                    <div class="loading-spinner">Загрузка сообщений...</div>
+                </div>
+
+                <button class="btn-back" id="backToDeptBtn">← Вернуться к выбору подразделения</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMOJI POPUP -->
+    <div class="emoji-popup" id="emojiPopup">
+        <input type="text" class="emoji-search" id="emojiSearch" placeholder="🔍 Поиск эмодзи...">
+        <div class="emoji-category">
+            <div class="emoji-category-title">Часто используемые</div>
+            <div class="emoji-grid" id="emojiFrequent"></div>
+        </div>
+        <div class="emoji-category">
+            <div class="emoji-category-title">Смайлики</div>
+            <div class="emoji-grid" id="emojiSmileys"></div>
+        </div>
+        <div class="emoji-category">
+            <div class="emoji-category-title">Жесты</div>
+            <div class="emoji-grid" id="emojiGestures"></div>
+        </div>
+        <div class="emoji-category">
+            <div class="emoji-category-title">Сердца</div>
+            <div class="emoji-grid" id="emojiHearts"></div>
+        </div>
+        <div class="emoji-category">
+            <div class="emoji-category-title">Предметы</div>
+            <div class="emoji-grid" id="emojiObjects"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    
+    <script>
+        const backToDeptBtn = document.getElementById('backToDeptBtn');
+        if (backToDeptBtn) {
+            backToDeptBtn.addEventListener('click', () => {
+                window.location.href = 'transition.html?to=department.html';
+            });
+        }
+    </script>
+</body>
+</html>
