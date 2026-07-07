@@ -2352,16 +2352,16 @@ body.theme-dark .transition-strip {
 @media (min-width: 769px) {
     .description {
         position: relative;
-        overflow: hidden;
+        overflow: visible;
     }
 
     /* Верхний туннель */
     .tunnel-animation-top {
         position: absolute;
-        top: 40px;
+        top: 150px;  /* Было 40px, увеличили */
         left: 0;
         width: 100%;
-        height: 80px;
+        height: 100px;
         z-index: 1;
     }
 
@@ -2374,15 +2374,15 @@ body.theme-dark .transition-strip {
     .tunnel-entrance {
         position: absolute;
         width: 100%;
-        height: 60px;
+        height: 80px;
         background: linear-gradient(180deg, 
             rgba(10, 10, 26, 0.95) 0%, 
             rgba(10, 10, 26, 0.8) 50%, 
             rgba(10, 10, 26, 0.95) 100%);
-        border-radius: 30px;
+        border-radius: 40px;
         box-shadow: 
-            inset 0 0 20px rgba(0, 0, 0, 0.8),
-            0 0 15px rgba(120, 100, 255, 0.3);
+            inset 0 0 30px rgba(0, 0, 0, 0.8),
+            0 0 20px rgba(120, 100, 255, 0.3);
         overflow: hidden;
         top: 50%;
         transform: translateY(-50%);
@@ -2390,12 +2390,12 @@ body.theme-dark .transition-strip {
 
     body.theme-light .tunnel-entrance {
         background: linear-gradient(180deg, 
-            rgba(45, 45, 74, 0.95) 0%, 
-            rgba(45, 45, 74, 0.8) 50%, 
-            rgba(45, 45, 74, 0.95) 100%);
+            rgba(254, 254, 254, 0.95) 0%, 
+            rgba(254, 254, 254, 0.9) 50%, 
+            rgba(254, 254, 254, 0.95) 100%);
         box-shadow: 
-            inset 0 0 20px rgba(0, 0, 0, 0.8),
-            0 0 15px rgba(237, 28, 36, 0.3);
+            inset 0 0 30px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(237, 28, 36, 0.3);
     }
 
     .tunnel-dark {
@@ -2403,31 +2403,31 @@ body.theme-dark .transition-strip {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 80%;
-        height: 40px;
+        width: 60%;
+        height: 50px;
         background: #000;
-        border-radius: 20px;
-        box-shadow: inset 0 0 30px rgba(0, 0, 0, 1);
+        border-radius: 25px;
+        box-shadow: inset 0 0 40px rgba(0, 0, 0, 1);
     }
 
     /* Поезд сверху */
     .train-top {
         position: absolute;
-        width: 120px;
-        height: 60px;
+        width: 140px;
+        height: 65px;
         z-index: 2;
-        top: 10px;
-        left: -150px;
-        animation: trainMove 8s linear infinite;
+        top: 17px;  /* Позиция внутри туннеля */
+        left: -200px;
+        animation: trainMove 10s linear infinite;
     }
 
     /* Нижний туннель */
     .tunnel-animation-bottom {
         position: absolute;
-        bottom: 40px;
+        bottom: 150px;  /* Было 40px, увеличили */
         left: 0;
         width: 100%;
-        height: 80px;
+        height: 100px;
         z-index: 1;
     }
 
@@ -2440,13 +2440,13 @@ body.theme-dark .transition-strip {
     /* Поезд снизу */
     .train-bottom {
         position: absolute;
-        width: 120px;
-        height: 60px;
+        width: 140px;
+        height: 65px;
         z-index: 2;
-        bottom: 10px;
-        left: -150px;
-        animation: trainMove 8s linear infinite;
-        animation-delay: 4s;
+        bottom: 17px;
+        left: -200px;
+        animation: trainMove 10s linear infinite;
+        animation-delay: 5s;
     }
 
     /* Стили поезда */
@@ -2454,14 +2454,14 @@ body.theme-dark .transition-strip {
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg, #ed1c24, #f7941d);
-        border-radius: 12px 12px 8px 8px;
+        border-radius: 15px 15px 10px 10px;
         position: relative;
-        box-shadow: 0 4px 15px rgba(237, 28, 36, 0.4);
+        box-shadow: 0 6px 20px rgba(237, 28, 36, 0.4);
     }
 
     body.theme-dark .train-car {
         background: linear-gradient(135deg, #7864ff, #64c8ff);
-        box-shadow: 0 4px 15px rgba(120, 100, 255, 0.4);
+        box-shadow: 0 6px 20px rgba(120, 100, 255, 0.4);
     }
 
     .train-car::before {
@@ -2472,7 +2472,7 @@ body.theme-dark .transition-strip {
         right: 10px;
         height: 20px;
         background: rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
+        border-radius: 5px;
     }
 
     .train-car::after {
@@ -2481,10 +2481,10 @@ body.theme-dark .transition-strip {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 900;
         color: #fff;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
     .train-wheels {
@@ -2508,7 +2508,7 @@ body.theme-dark .transition-strip {
     /* Анимация поезда */
     @keyframes trainMove {
         0% {
-            left: -150px;
+            left: -200px;
             opacity: 0;
         }
         5% {
@@ -2518,7 +2518,7 @@ body.theme-dark .transition-strip {
             opacity: 1;
         }
         100% {
-            left: calc(100vw + 50px);
+            left: calc(100vw + 100px);
             opacity: 0;
         }
     }
@@ -2530,7 +2530,24 @@ body.theme-dark .transition-strip {
 
     /* Сдвигаем контент, чтобы освободить место для поездов */
     .description-inner {
-        margin-top: 100px;
-        margin-bottom: 100px;
+        margin-top: 180px;  /* Было 120px, увеличили */
+        margin-bottom: 180px;  /* Было 120px, увеличили */
+    }
+}
+
+/* На мобильных убираем поезда, оставляем только волны */
+@media (max-width: 768px) {
+    .tunnel-animation-top,
+    .tunnel-animation-bottom {
+        display: none !important;
+    }
+    
+    .description {
+        overflow: hidden;
+    }
+    
+    .description-inner {
+        margin-top: 0;
+        margin-bottom: 0;
     }
 }
