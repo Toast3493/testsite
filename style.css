@@ -2195,7 +2195,7 @@ body.theme-dark .show-more-btn:hover {
     border-color: #7864ff;
 }
 
-/* ===== АНИМАЦИЯ ПЕРЕХОДА МЕЖДУ СТРАНИЦАМИ ===== */
+/* ===== АНИМАЦИЯ ПЕРЕХОДА: ДИАГОНАЛЬНЫЕ ПОЛОСЫ ===== */
 #page-transition-overlay {
     position: fixed;
     top: 0;
@@ -2205,58 +2205,62 @@ body.theme-dark .show-more-btn:hover {
     z-index: 9999;
     pointer-events: none;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-#page-transition-overlay.active {
-    opacity: 1;
-    pointer-events: all;
+.transition-strip {
+    flex: 1;
+    width: 150%;
+    transform: translateX(-100%) rotate(-15deg);
+    transform-origin: left center;
+    transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+    position: relative;
 }
 
-.transition-circle {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ed1c24, #f7941d);
-    transform: scale(0);
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* Градиент для полос в светлой теме */
+body.theme-light .transition-strip {
+    background: linear-gradient(135deg, #ed1c24 0%, #f7941d 50%, #be1e2d 100%);
 }
 
-body.theme-dark .transition-circle {
-    background: linear-gradient(135deg, #7864ff, #64c8ff);
+/* Градиент для полос в тёмной теме */
+body.theme-dark .transition-strip {
+    background: linear-gradient(135deg, #7864ff 0%, #64c8ff 50%, #ff82c8 100%);
 }
 
-#page-transition-overlay.active .transition-circle {
-    width: 300vmax;
-    height: 300vmax;
-    transform: scale(1);
+/* Закрытие полос (переход на новую страницу) */
+#page-transition-overlay.closing .transition-strip {
+    transform: translateX(0) rotate(-15deg);
 }
 
-.transition-text {
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease 0.2s;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+/* Задержка для каждой полосы */
+.transition-strip:nth-child(1) { transition-delay: 0ms; }
+.transition-strip:nth-child(2) { transition-delay: 50ms; }
+.transition-strip:nth-child(3) { transition-delay: 100ms; }
+.transition-strip:nth-child(4) { transition-delay: 150ms; }
+.transition-strip:nth-child(5) { transition-delay: 200ms; }
+.transition-strip:nth-child(6) { transition-delay: 250ms; }
+.transition-strip:nth-child(7) { transition-delay: 300ms; }
+.transition-strip:nth-child(8) { transition-delay: 350ms; }
+.transition-strip:nth-child(9) { transition-delay: 400ms; }
+.transition-strip:nth-child(10) { transition-delay: 450ms; }
+.transition-strip:nth-child(11) { transition-delay: 500ms; }
+.transition-strip:nth-child(12) { transition-delay: 550ms; }
+
+/* Открытие полос (загрузка новой страницы) */
+#page-transition-overlay.opening .transition-strip {
+    transform: translateX(0) rotate(-15deg);
 }
 
-#page-transition-overlay.active .transition-text {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-#page-transition-overlay.exit .transition-circle {
-    transform: scale(0);
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-#page-transition-overlay.exit .transition-text {
-    opacity: 0;
-    transform: translateY(-20px);
-}
+#page-transition-overlay.opening .transition-strip:nth-child(1) { transition-delay: 550ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(2) { transition-delay: 500ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(3) { transition-delay: 450ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(4) { transition-delay: 400ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(5) { transition-delay: 350ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(6) { transition-delay: 300ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(7) { transition-delay: 250ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(8) { transition-delay: 200ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(9) { transition-delay: 150ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(10) { transition-delay: 100ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(11) { transition-delay: 50ms; }
+#page-transition-overlay.opening .transition-strip:nth-child(12) { transition-delay: 0ms; }
