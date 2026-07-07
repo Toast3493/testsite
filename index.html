@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Главная страница</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="theme-light locked">
+
+    <!-- СВЕТЛАЯ ТЕМА: КОЛЕСА С СЕКТОРАМИ -->
+    <div class="bg-light">
+        <div class="geo-wheel wheel1"></div>
+        <div class="geo-wheel wheel2"></div>
+        <div class="geo-wheel wheel3"></div>
+        <div class="geo-shape triangle1"></div>
+        <div class="geo-shape triangle2"></div>
+    </div>
+
+    <!-- ТЁМНАЯ ТЕМА: СТАРЫЕ ЭЛЕМЕНТЫ -->
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+    <div class="blob blob4"></div>
+    <div class="bubbles" id="bubbles"></div>
+
+    <div class="glow-orb orb1"></div>
+    <div class="glow-orb orb2"></div>
+    <div class="glow-orb orb3"></div>
+    <canvas id="starCanvas"></canvas>
+
+    <header>
+        <div class="header-inner">
+            <!-- ЛЕВАЯ ЧАСТЬ: ЛОГОТИП + ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ -->
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/Toast3493/Toast3493.github.io/main/logo-dark.png" alt="Логотип" class="logo logo-light">
+                    <img src="https://raw.githubusercontent.com/Toast3493/Toast3493.github.io/main/logo-light.png" alt="Логотип" class="logo logo-dark">
+                </div>
+                <div class="theme-toggle" id="themeToggle" title="Переключить тему">
+                    <div class="toggle-knob" id="toggleKnob">
+                        <span class="icon-sun">☀️</span>
+                        <span class="icon-moon">🌙</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПРАВАЯ ЧАСТЬ: НАВИГАЦИЯ + ССЫЛКА НА РОСПРОФЖЕЛ -->
+            <div class="header-right">
+                <nav id="nav">
+                    <a href="department.html" class="tab1">ГУП "Московский метрополитен"</a>
+                    <a class="tab2 fake-tab" data-msg="Скоро будет доступно ✨">ОАО "РЖД"</a>
+                    <!-- Ссылка на Роспрофжел для мобильных (в меню) -->
+                    <a href="https://rosprofzhel.ru/" target="_blank" class="rospofzhel-link-mobile">🔗 Роспрофжел</a>
+                </nav>
+                <!-- Ссылка на Роспрофжел для десктопа (справа от меню) -->
+                <a href="https://rosprofzhel.ru/" target="_blank" class="rospofzhel-link">Роспрофжел</a>
+                <div class="burger" id="burger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="description">
+        <div class="description-inner">
+            <h2>У каждой истории есть значение...</h2>
+            <p class="welcome-text">Добро пожаловать!</p>
+            <p>За каждым профсоюзом стоят не только документы, собрания и отчеты. Прежде всего — это люди, их поддержка, взаимопомощь и истории, которые остаются в памяти на всю жизнь.</p>
+            
+            <a href="department.html" class="btn-start">Начать</a>
+        </div>
+    </div>
+
+    <div class="wave-divider">
+        <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
+            <path class="wave-path-1" d="M0,80 C360,150 720,0 1080,80 C1260,120 1380,100 1440,80 L1440,150 L0,150 Z"/>
+            <path class="wave-path-2" d="M0,100 C360,40 720,140 1080,80 C1260,50 1380,90 1440,100 L1440,150 L0,150 Z"/>
+        </svg>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+    <script src="transition.js"></script>
+</body>
+</html>
