@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Главная страница</title>
-    
     <link rel="stylesheet" href="style.css">
-    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="theme-light locked">
+
+    <!-- Контейнер для летающих сообщений (фон) -->
+    <div id="floating-messages-container"></div>
 
     <!-- СВЕТЛАЯ ТЕМА: КОЛЕСА С СЕКТОРАМИ -->
     <div class="bg-light">
@@ -39,14 +40,14 @@
             <div class="header-left">
                 <div class="logo-container">
                     <a href="index.html">
-                    <img src="logo-dark.png" alt="Логотип" class="logo logo-light">
-                    <img src="logo-light.png" alt="Логотип" class="logo logo-dark">
+                        <img src="logo-dark.png" alt="Логотип" class="logo logo-light">
+                        <img src="logo-light.png" alt="Логотип" class="logo logo-dark">
                     </a>
                 </div>
                 <div class="theme-toggle" id="themeToggle" title="Переключить тему">
                     <div class="toggle-knob" id="toggleKnob">
                         <span class="icon-sun">☀️</span>
-                        <span class="icon-moon">🌙</span>
+                        <span class="icon-moon"></span>
                     </div>
                 </div>
             </div>
@@ -163,27 +164,29 @@
 
 <div class="toast" id="toast"></div>
 
-    <!-- ===== ПЛАВАЮЩИЙ ВИДЖЕТ ИСТОРИЙ ===== -->
+    <!-- ===== ПЛАВАЮЩИЙ ВИДЖЕТ ИСТОРИЙ (ОБНОВЛЁННЫЙ) ===== -->
     <!-- Кнопка открытия -->
-    <button id="chatToggleBtn" class="chat-toggle-btn" title="Читать и делиться историями">
-        💬 Истории <span id="newMsgBadge" class="msg-badge hidden">0</span>
+    <button id="chatToggleBtn" class="chat-toggle-btn" title="Поделиться историей">
+        ️ Написать историю
     </button>
 
-    <!-- Окно чата -->
+    <!-- Окно чата (только форма отправки, без вывода сообщений) -->
     <div id="chatWidget" class="chat-widget hidden">
         <div class="chat-widget-header">
-            <span>📖 Истории профсоюза</span>
+            <span>📖 Добавить историю в профсоюз</span>
             <button id="closeChatBtn" class="close-chat-btn">✕</button>
         </div>
         
-        <div class="chat-widget-messages" id="chatWidgetMessages">
-            <div class="loading-spinner">Загрузка историй...</div>
-        </div>
-        
         <div class="chat-widget-input">
-            <input type="text" id="widgetAuthor" placeholder="Ваше имя (или Аноним)" maxlength="30">
-            <textarea id="widgetText" placeholder="Поделитесь своей историей..." rows="2"></textarea>
-            <button id="sendWidgetBtn" class="send-widget-btn">Отправить</button>
+            <input type="text" id="widgetAuthor" placeholder="Ваше имя *" maxlength="30" required>
+            <select id="widgetUnion" required>
+                <option value="" disabled selected>Выберите профсоюз *</option>
+                <option value="1">ППО ДИТС</option>
+                <option value="2">ППО Управления метрополитена</option>
+                <option value="3">ППО Службы движения</option>
+            </select>
+            <textarea id="widgetText" placeholder="Ваша история или благодарность..." rows="3" required></textarea>
+            <button id="sendWidgetBtn" class="send-widget-btn">Отправить историю</button>
         </div>
     </div>
     
