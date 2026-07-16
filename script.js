@@ -8,7 +8,6 @@ const firebaseConfig = {
     appId: "1:789513290691:web:40e2ebc7b3611ac9b83376",
     measurementId: "G-5R4SZ4B19R"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -39,29 +38,23 @@ function formatTimestamp(ts) {
 function loadMessages(chatNum) {
     const list = document.getElementById('messagesList' + chatNum);
     if (!list) return;
-    
     const collectionName = 'messages' + chatNum;
     list.innerHTML = '<div class="loading-spinner">Загрузка сообщений...</div>';
-
     db.collection(collectionName)
         .orderBy('timestamp', 'desc')
         .onSnapshot((snapshot) => {
             list.innerHTML = '';
-
             if (snapshot.empty) {
                 list.innerHTML = '<div class="loading-spinner">Пока нет сообщений. Будьте первым!</div>';
                 return;
             }
-
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
                 item.className = 'message-item';
-
-                const author = data.author || 'Аноним';
+                const author = data.author || 'Не указано';
                 const timeStr = data.timestamp ? formatTimestamp(data.timestamp) : '';
                 const timeHtml = timeStr ? `<div class="message-time">${timeStr}</div>` : '';
-
                 item.innerHTML = `
                     <div class="message-author">${escapeHtml(author)}</div>
                     <div class="message-text">${escapeHtml(data.text || '')}</div>
@@ -75,22 +68,6 @@ function loadMessages(chatNum) {
         });
 }
 
-// ===== ОТПРАВКА СООБЩЕНИЯ =====
-async function sendMessageToFirebase(chatNum, text, author) {
-    const collectionName = 'messages' + chatNum;
-    try {
-        await db.collection(collectionName).add({
-            text: text,
-            author: author || 'Аноним',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return { success: true };
-    } catch (error) {
-        console.error('Ошибка отправки:', error);
-        return { success: false, error: error.message };
-    }
-}
-
 // Загружаем сообщения для текущего чата (если есть)
 const currentChatNum = document.body.dataset.chat;
 if (currentChatNum) {
@@ -100,7 +77,6 @@ if (currentChatNum) {
 // ===== ТЕМА =====
 const body = document.body;
 const themeToggle = document.getElementById('themeToggle');
-
 const savedTheme = localStorage.getItem('theme') || 'light';
 setTheme(savedTheme);
 
@@ -120,13 +96,11 @@ function setTheme(theme) {
 // ===== БУРГЕР-МЕНЮ =====
 const burger = document.getElementById('burger');
 const nav = document.getElementById('nav');
-
 if (burger && nav) {
     burger.addEventListener('click', () => {
         burger.classList.toggle('active');
         nav.classList.toggle('active');
     });
-
     nav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             burger.classList.remove('active');
@@ -265,25 +239,19 @@ if (ctx) {
 // ===== TOAST =====
 const toast = document.getElementById('toast');
 let toastTimeout = null;
-
 function showToast(message) {
     if (!toast) return;
-    
     if (toastTimeout) {
         clearTimeout(toastTimeout);
         toastTimeout = null;
     }
-    
     toast.textContent = message;
     toast.classList.remove('hide');
     toast.classList.add('show');
-    
     const duration = window.innerWidth <= 768 ? 2000 : 3000;
-    
     toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.add('hide');
-        
         setTimeout(() => {
             if (!toast.classList.contains('show')) {
                 toast.classList.remove('hide');
@@ -303,17 +271,16 @@ document.querySelectorAll('.fake-tab').forEach(tab => {
 // ===== EMOJI PICKER =====
 const emojiData = {
     frequent: ['😊', '😂', '❤️', '👍', '🙏', '✨', '🎉', '🔥', '💪', '👏', '✅', '⭐'],
-    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😊', '😇', '😍', '🤩', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
-    gestures: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '💅', '🤳', '💪'],
-    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
-    objects: ['🎁', '🎀', '🥇', '🏆', '📝', '📋', '📁', '📂', '✉️', '📧', '📩', '📤', '🖥️', '⏰', '📅', '🗓️', '🔔', '📢', '📣', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '🏢', '🏛️', '🎯', '🚀', '✨', '💫', '🌟', '⭐', '🎊', '🎉']
+    smileys: ['😀', '', '😄', '😁', '', '😅', '🤣', '😂', '🙂', '😊', '😇', '😍', '🤩', '', '😗', '😙', '', '😋', '😛', '', '🤪', '😝', '🤑', '🤗', '', '🤫', '🤔', '🤐', '🤨', '', '😑', '😶', '', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '', '🤢', '🤮', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
+    gestures: ['', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '', '✌️', '🤞', '🤟', '🤘', '', '👈', '👉', '👆', '🖕', '👇', '☝️', '', '👎', '✊', '👊', '🤛', '', '👏', '🙌', '👐', '🤲', '', '🙏', '💅', '🤳', '💪'],
+    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️🔥', '❤️‍', '💕', '💞', '', '💗', '💖', '', '💝', '💟'],
+    objects: ['🎁', '🎀', '🥇', '🏆', '', '📋', '📁', '📂', '✉️', '📧', '📩', '', '🖥️', '⏰', '📅', '🗓️', '🔔', '📢', '', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '', '🏛️', '', '🚀', '✨', '', '🌟', '⭐', '', '🎉']
 };
 
 let currentEmojiTarget = null;
 const emojiPopup = document.getElementById('emojiPopup');
 const emojiSearch = document.getElementById('emojiSearch');
 
-// Заполняем эмодзи
 function fillEmojiGrid(containerId, emojis) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -337,7 +304,6 @@ if (emojiPopup) {
     fillEmojiGrid('emojiObjects', emojiData.objects);
 }
 
-// Вставка эмодзи в textarea
 function insertEmoji(emoji) {
     if (!currentEmojiTarget) return;
     const textarea = currentEmojiTarget;
@@ -349,37 +315,28 @@ function insertEmoji(emoji) {
     textarea.focus();
 }
 
-// Кнопки открытия emoji popup
 document.querySelectorAll('.emoji-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const chatNum = btn.dataset.chat;
         const textarea = document.getElementById('messageInput' + chatNum);
-        
         if (!textarea || !emojiPopup) return;
-        
-        // Если popup уже открыт для этого чата — закрываем
         if (emojiPopup.classList.contains('active') && currentEmojiTarget === textarea) {
             emojiPopup.classList.remove('active');
             currentEmojiTarget = null;
             return;
         }
-        
         currentEmojiTarget = textarea;
-        
-        // Позиционируем popup рядом с кнопкой
         const rect = btn.getBoundingClientRect();
         emojiPopup.style.position = 'fixed';
         emojiPopup.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
         emojiPopup.style.left = Math.max(10, rect.left - 140) + 'px';
         emojiPopup.style.top = 'auto';
-        
         emojiPopup.classList.add('active');
         emojiSearch.value = '';
     });
 });
 
-// Закрытие popup при клике вне его
 document.addEventListener('click', (e) => {
     if (!emojiPopup || !currentEmojiTarget) return;
     if (!emojiPopup.contains(e.target) && !e.target.classList.contains('emoji-btn')) {
@@ -388,7 +345,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Закрытие по Escape
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && emojiPopup) {
         emojiPopup.classList.remove('active');
@@ -400,55 +356,60 @@ document.addEventListener('keydown', (e) => {
 function toggleInfo(chatNum) {
     const content = document.getElementById('infoContent' + chatNum);
     const btn = content.nextElementSibling;
-    
     if (content.classList.contains('collapsed')) {
-        // Раскрываем
         content.classList.remove('collapsed');
         btn.textContent = 'Скрыть ↑';
-        
-        // Плавная прокрутка к раскрытому тексту
         setTimeout(() => {
             content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
     } else {
-        // Сворачиваем
         content.classList.add('collapsed');
         btn.textContent = 'Показать ещё ↓';
     }
 }
 
 // ===== ОТПРАВКА СООБЩЕНИЙ (для страниц чатов) =====
+// ИЗМЕНЕНИЕ: Имя теперь ОБЯЗАТЕЛЬНОЕ
 document.querySelectorAll('.btn-send').forEach(btn => {
     btn.addEventListener('click', async () => {
         const chatNum = btn.dataset.chat;
         const input = document.getElementById('messageInput' + chatNum);
         const authorInput = document.getElementById('authorInput' + chatNum);
         const text = input.value.trim();
+        const author = authorInput ? authorInput.value.trim() : '';
 
+        // СТРОГАЯ ПРОВЕРКА: имя обязательно
+        if (!author) {
+            showToast('⚠️ Пожалуйста, введите ваше имя');
+            if (authorInput) authorInput.focus();
+            return;
+        }
         if (!text) {
             showToast('Пожалуйста, введите сообщение');
             return;
         }
 
-        const author = authorInput ? authorInput.value.trim() : '';
-
         const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = 'Отправка...';
 
-        const result = await sendMessageToFirebase(chatNum, text, author);
-
-        if (result.success) {
+        try {
+            await db.collection('messages' + chatNum).add({
+                text: text,
+                author: author,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
             input.value = '';
             setTimeout(() => {
                 showToast('✅ Сообщение отправлено!');
             }, 300);
-        } else {
+        } catch (error) {
+            console.error('Ошибка отправки:', error);
             showToast('❌ Ошибка отправки');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
         }
-
-        btn.disabled = false;
-        btn.textContent = originalText;
     });
 });
 
@@ -457,17 +418,14 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const targetId = this.id.replace('toggle', 'infoSection').replace('toggle', 'chatInputSection');
         let targetSection;
-        
         if (this.id.includes('Info')) {
             targetSection = document.getElementById('infoSection' + this.id.replace('toggleInfo', ''));
         } else if (this.id.includes('Chat')) {
             targetSection = document.getElementById('chatInputSection' + this.id.replace('toggleChat', ''));
         }
-        
         if (targetSection) {
             targetSection.classList.toggle('hidden-section');
             this.classList.toggle('active');
-            
             if (this.id.includes('Info')) {
                 this.textContent = this.classList.contains('active') ? '👤 Скрыть информацию' : '👤 Показать информацию о председателе';
             } else if (this.id.includes('Chat')) {
@@ -477,121 +435,156 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
     });
 });
 
-// ===== ПЛАВАЮЩИЙ ЧАТ ИСТОРИЙ =====
+// ==========================================
+// ===== ПЛАВАЮЩИЙ ЧАТ ИСТОРИЙ (ОБНОВЛЁННЫЙ) =====
+// ==========================================
+
 const chatToggleBtn = document.getElementById('chatToggleBtn');
 const chatWidget = document.getElementById('chatWidget');
 const closeChatBtn = document.getElementById('closeChatBtn');
-const chatWidgetMessages = document.getElementById('chatWidgetMessages');
-const widgetAuthor = document.getElementById('widgetAuthor');
-const widgetText = document.getElementById('widgetText');
 const sendWidgetBtn = document.getElementById('sendWidgetBtn');
-const newMsgBadge = document.getElementById('newMsgBadge');
 
-let isChatOpen = false;
-let previousMessageCount = 0;
+// ИЗМЕНЕНИЕ: Убираем вывод сообщений, оставляем только форму отправки
+// Добавляем select для выбора профсоюза
 
 // 1. Открытие/закрытие виджета
-chatToggleBtn.addEventListener('click', () => {
-    isChatOpen = !isChatOpen;
-    if (isChatOpen) {
-        chatWidget.classList.remove('hidden');
-        newMsgBadge.classList.add('hidden'); // Сбрасываем счётчик при открытии
-        newMsgBadge.textContent = '0';
-        // Прокрутка вниз при открытии
-        setTimeout(() => {
-            chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
-        }, 100);
-    } else {
-        chatWidget.classList.add('hidden');
-    }
-});
-
-closeChatBtn.addEventListener('click', () => {
-    isChatOpen = false;
-    chatWidget.classList.add('hidden');
-});
-
-// 2. Загрузка и прослушивание историй из Firebase (в реальном времени)
-const storiesCollection = db.collection('union_stories');
-
-storiesCollection.orderBy('timestamp', 'asc').onSnapshot((snapshot) => {
-    if (snapshot.empty) {
-        chatWidgetMessages.innerHTML = '<div class="loading-spinner">Пока нет историй. Будьте первым!</div>';
-        previousMessageCount = 0;
-        return;
-    }
-
-    // Проверяем, появились ли новые сообщения
-    const currentCount = snapshot.size;
-    if (currentCount > previousMessageCount && previousMessageCount !== 0) {
-        // Новое сообщение пришло!
-        if (!isChatOpen) {
-            const newCount = currentCount - previousMessageCount;
-            newMsgBadge.textContent = newCount > 9 ? '9+' : newCount;
-            newMsgBadge.classList.remove('hidden');
-            
-            // Показываем тост-уведомление (функция showToast должна быть у тебя в коде)
-            if (typeof showToast === 'function') {
-                showToast('🔔 У вас новая история в чате!');
-            }
-        }
-    }
-    previousMessageCount = currentCount;
-
-    // Рендерим сообщения
-    chatWidgetMessages.innerHTML = '';
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        const author = data.author || 'Аноним';
-        const text = data.text || '';
-        const timeStr = data.timestamp ? formatTimestamp(data.timestamp) : '';
-
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'widget-message';
-        msgDiv.innerHTML = `
-            <div class="widget-msg-author">👤 ${escapeHtml(author)}</div>
-            <div class="widget-msg-text">${escapeHtml(text)}</div>
-            ${timeStr ? `<div class="widget-msg-time">${timeStr}</div>` : ''}
-        `;
-        chatWidgetMessages.appendChild(msgDiv);
+if (chatToggleBtn && chatWidget) {
+    chatToggleBtn.addEventListener('click', () => {
+        chatWidget.classList.toggle('hidden');
     });
+}
 
-    // Если чат открыт, автопрокрутка вниз
-    if (isChatOpen) {
-        chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
+if (closeChatBtn && chatWidget) {
+    closeChatBtn.addEventListener('click', () => {
+        chatWidget.classList.add('hidden');
+    });
+}
+
+// 2. Отправка истории из виджета в выбранный профсоюз
+if (sendWidgetBtn) {
+    sendWidgetBtn.addEventListener('click', async () => {
+        const authorInput = document.getElementById('widgetAuthor');
+        const unionSelect = document.getElementById('widgetUnion');
+        const textInput = document.getElementById('widgetText');
+
+        if (!authorInput || !unionSelect || !textInput) {
+            showToast('❌ Ошибка формы');
+            return;
+        }
+
+        const author = authorInput.value.trim();
+        const unionId = unionSelect.value;
+        const text = textInput.value.trim();
+
+        // СТРОГАЯ ПРОВЕРКА: имя обязательно
+        if (!author) {
+            showToast('⚠️ Пожалуйста, введите ваше имя');
+            authorInput.focus();
+            return;
+        }
+        if (!unionId) {
+            showToast('⚠️ Пожалуйста, выберите профсоюз');
+            return;
+        }
+        if (!text) {
+            showToast('️ Пожалуйста, напишите текст истории');
+            textInput.focus();
+            return;
+        }
+
+        sendWidgetBtn.disabled = true;
+        sendWidgetBtn.textContent = 'Отправка...';
+
+        try {
+            // ОТПРАВЛЯЕМ В ПРАВИЛЬНУЮ КОЛЛЕКЦИЮ: messages1, messages2 или messages3
+            await db.collection('messages' + unionId).add({
+                author: author,
+                text: text,
+                unionId: unionId, // Сохраняем ID профсоюза для отображения
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            textInput.value = ''; // Очищаем только текст, имя оставляем
+            showToast('✅ История успешно добавлена!');
+            chatWidget.classList.add('hidden');
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('❌ Ошибка отправки');
+        } finally {
+            sendWidgetBtn.disabled = false;
+            sendWidgetBtn.textContent = 'Отправить';
+        }
+    });
+}
+
+// ==========================================
+// ===== ЛЕТАЮЩИЕ СООБЩЕНИЯ (НОВОЕ) =====
+// ==========================================
+
+const floatingContainer = document.getElementById('floating-messages-container');
+const unionNames = { '1': 'ППО ДИТС', '2': 'ППО Управления', '3': 'ППО Движения' };
+
+function spawnFloatingMessage(data) {
+    if (!floatingContainer) return;
+
+    // Проверяем, что сообщение свежее (не старше 15 секунд), чтобы не спамить при загрузке
+    if (data.timestamp) {
+        const msgTime = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+        if ((Date.now() - msgTime.getTime()) > 15000) return;
     }
-}, (error) => {
-    console.error('Ошибка загрузки историй:', error);
-    chatWidgetMessages.innerHTML = '<div class="loading-spinner">⚠️ Ошибка загрузки</div>';
-});
 
-// 3. Отправка новой истории
-sendWidgetBtn.addEventListener('click', async () => {
-    const text = widgetText.value.trim();
-    if (!text) {
-        if (typeof showToast === 'function') showToast('Пожалуйста, напишите текст истории');
-        return;
+    const el = document.createElement('div');
+    const isDark = body.classList.contains('theme-dark');
+    const unionId = data.unionId || '1';
+    const unionName = unionNames[unionId] || 'Профсоюз';
+    const author = escapeHtml(data.author || 'Не указано');
+    const text = escapeHtml(data.text || '');
+
+    if (isDark) {
+        // Тёмная тема: Пузырьки с текстом
+        el.className = 'floating-bubble-msg';
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.animationDuration = (Math.random() * 10 + 12) + 's';
+        el.innerHTML = `
+            <div class="fb-author">👤 ${author}</div>
+            <div class="fb-union">🚇 ${unionName}</div>
+            <div class="fb-text">${text}</div>
+        `;
+    } else {
+        // Светлая тема: Геометрические фигуры
+        const shapes = ['fb-shape-circle', 'fb-shape-square', 'fb-shape-diamond', 'fb-shape-rect'];
+        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+        el.className = `floating-geo-msg ${randomShape}`;
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.animationDuration = (Math.random() * 8 + 10) + 's';
+        el.innerHTML = `
+            <div class="fb-content">
+                <div class="fb-author"> ${author}</div>
+                <div class="fb-union">🚇 ${unionName}</div>
+                <div class="fb-text">${text}</div>
+            </div>
+        `;
     }
 
-    const author = widgetAuthor.value.trim() || 'Аноним';
-    
-    sendWidgetBtn.disabled = true;
-    sendWidgetBtn.textContent = 'Отправка...';
+    floatingContainer.appendChild(el);
 
-    try {
-        await storiesCollection.add({
-            author: author,
-            text: text,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        widgetText.value = ''; // Очищаем только текст, имя оставляем
-        if (typeof showToast === 'function') showToast('✅ Ваша история добавлена!');
-    } catch (error) {
-        console.error('Ошибка отправки:', error);
-        if (typeof showToast === 'function') showToast('❌ Ошибка отправки');
-    } finally {
-        sendWidgetBtn.disabled = false;
-        sendWidgetBtn.textContent = 'Отправить';
-    }
+    // Удаляем элемент после завершения анимации
+    setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+    }, 25000);
+}
+
+// Слушаем все 3 коллекции на наличие новых сообщений
+['1', '2', '3'].forEach(chatNum => {
+    db.collection('messages' + chatNum)
+      .orderBy('timestamp', 'desc')
+      .limit(1)
+      .onSnapshot((snapshot) => {
+          if (!snapshot.empty) {
+              const doc = snapshot.docs[0];
+              const data = doc.data();
+              data.unionId = chatNum;
+              spawnFloatingMessage(data);
+          }
+      });
 });
