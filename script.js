@@ -476,3 +476,122 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
         }
     });
 });
+
+// ===== ПЛАВАЮЩИЙ ЧАТ ИСТОРИЙ =====
+const chatToggleBtn = document.getElementById('chatToggleBtn');
+const chatWidget = document.getElementById('chatWidget');
+const closeChatBtn = document.getElementById('closeChatBtn');
+const chatWidgetMessages = document.getElementById('chatWidgetMessages');
+const widgetAuthor = document.getElementById('widgetAuthor');
+const widgetText = document.getElementById('widgetText');
+const sendWidgetBtn = document.getElementById('sendWidgetBtn');
+const newMsgBadge = document.getElementById('newMsgBadge');
+
+let isChatOpen = false;
+let previousMessageCount = 0;
+
+// 1. Открытие/закрытие виджета
+chatToggleBtn.addEventListener('click', () => {
+    isChatOpen = !isChatOpen;
+    if (isChatOpen) {
+        chatWidget.classList.remove('hidden');
+        newMsgBadge.classList.add('hidden'); // Сбрасываем счётчик при открытии
+        newMsgBadge.textContent = '0';
+        // Прокрутка вниз при открытии
+        setTimeout(() => {
+            chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
+        }, 100);
+    } else {
+        chatWidget.classList.add('hidden');
+    }
+});
+
+closeChatBtn.addEventListener('click', () => {
+    isChatOpen = false;
+    chatWidget.classList.add('hidden');
+});
+
+// 2. Загрузка и прослушивание историй из Firebase (в реальном времени)
+const storiesCollection = db.collection('union_stories');
+
+storiesCollection.orderBy('timestamp', 'asc').onSnapshot((snapshot) => {
+    if (snapshot.empty) {
+        chatWidgetMessages.innerHTML = '<div class="loading-spinner">Пока нет историй. Будьте первым!</div>';
+        previousMessageCount = 0;
+        return;
+    }
+
+    // Проверяем, появились ли новые сообщения
+    const currentCount = snapshot.size;
+    if (currentCount > previousMessageCount && previousMessageCount !== 0) {
+        // Новое сообщение пришло!
+        if (!isChatOpen) {
+            const newCount = currentCount - previousMessageCount;
+            newMsgBadge.textContent = newCount > 9 ? '9+' : newCount;
+            newMsgBadge.classList.remove('hidden');
+            
+            // Показываем тост-уведомление (функция showToast должна быть у тебя в коде)
+            if (typeof showToast === 'function') {
+                showToast('🔔 У вас новая история в чате!');
+            }
+        }
+    }
+    previousMessageCount = currentCount;
+
+    // Рендерим сообщения
+    chatWidgetMessages.innerHTML = '';
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const author = data.author || 'Аноним';
+        const text = data.text || '';
+        const timeStr = data.timestamp ? formatTimestamp(data.timestamp) : '';
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'widget-message';
+        msgDiv.innerHTML = `
+            <div class="widget-msg-author">👤 ${escapeHtml(author)}</div>
+            <div class="widget-msg-text">${escapeHtml(text)}</div>
+            ${timeStr ? `<div class="widget-msg-time">${timeStr}</div>` : ''}
+        `;
+        chatWidgetMessages.appendChild(msgDiv);
+    });
+
+    // Если чат открыт, автопрокрутка вниз
+    if (isChatOpen) {
+        chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
+    }
+}, (error) => {
+    console.error('Ошибка загрузки историй:', error);
+    chatWidgetMessages.innerHTML = '<div class="loading-spinner">⚠️ Ошибка загрузки</div>';
+});
+
+// 3. Отправка новой истории
+sendWidgetBtn.addEventListener('click', async () => {
+    const text = widgetText.value.trim();
+    if (!text) {
+        if (typeof showToast === 'function') showToast('Пожалуйста, напишите текст истории');
+        return;
+    }
+
+    const author = widgetAuthor.value.trim() || 'Аноним';
+    
+    sendWidgetBtn.disabled = true;
+    sendWidgetBtn.textContent = 'Отправка...';
+
+    try {
+        await storiesCollection.add({
+            author: author,
+            text: text,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        widgetText.value = ''; // Очищаем только текст, имя оставляем
+        if (typeof showToast === 'function') showToast('✅ Ваша история добавлена!');
+    } catch (error) {
+        console.error('Ошибка отправки:', error);
+        if (typeof showToast === 'function') showToast('❌ Ошибка отправки');
+    } finally {
+        sendWidgetBtn.disabled = false;
+        sendWidgetBtn.textContent = 'Отправить';
+    }
+});
