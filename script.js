@@ -35,7 +35,7 @@ function formatTimestamp(ts) {
     return date.toLocaleDateString('ru-RU');
 }
 
-// ===== ЗАГРУЗКА СООБЩЕНИЙ В ЧАТАХ =====
+// ===== ЗАГРУЗКА СООБЩЕНИЙ =====
 function loadMessages(chatNum) {
     const list = document.getElementById('messagesList' + chatNum);
     if (!list) return;
@@ -47,15 +47,18 @@ function loadMessages(chatNum) {
         .orderBy('timestamp', 'desc')
         .onSnapshot((snapshot) => {
             list.innerHTML = '';
+
             if (snapshot.empty) {
                 list.innerHTML = '<div class="loading-spinner">Пока нет сообщений. Будьте первым!</div>';
                 return;
             }
+
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
                 item.className = 'message-item';
-                const author = data.author || 'Не указано';
+
+                const author = data.author || 'Аноним';
                 const timeStr = data.timestamp ? formatTimestamp(data.timestamp) : '';
                 const timeHtml = timeStr ? `<div class="message-time">${timeStr}</div>` : '';
 
@@ -72,53 +75,32 @@ function loadMessages(chatNum) {
         });
 }
 
+// ===== ОТПРАВКА СООБЩЕНИЯ =====
+async function sendMessageToFirebase(chatNum, text, author) {
+    const collectionName = 'messages' + chatNum;
+    try {
+        await db.collection(collectionName).add({
+            text: text,
+            author: author || 'Аноним',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('Ошибка отправки:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Загружаем сообщения для текущего чата (если есть)
 const currentChatNum = document.body.dataset.chat;
-if (currentChatNum) loadMessages(currentChatNum);
-
-// ===== ОТПРАВКА СООБЩЕНИЯ В ЧАТАХ (СТРОГАЯ ПРОВЕРКА ИМЕНИ) =====
-document.querySelectorAll('.btn-send').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        const chatNum = btn.dataset.chat;
-        const input = document.getElementById('messageInput' + chatNum);
-        const authorInput = document.getElementById('authorInput' + chatNum);
-        const text = input.value.trim();
-        const author = authorInput ? authorInput.value.trim() : '';
-
-        // СТРОГАЯ ПРОВЕРКА: имя обязательно
-        if (!author) {
-            showToast('⚠️ Пожалуйста, введите ваше имя (анонимность отключена)');
-            return;
-        }
-        if (!text) {
-            showToast('Пожалуйста, введите сообщение');
-            return;
-        }
-
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Отправка...';
-
-        try {
-            await db.collection('messages' + chatNum).add({
-                text: text,
-                author: author,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            input.value = '';
-            showToast('✅ Сообщение отправлено!');
-        } catch (error) {
-            console.error('Ошибка отправки:', error);
-            showToast('❌ Ошибка отправки');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = originalText;
-        }
-    });
-});
+if (currentChatNum) {
+    loadMessages(currentChatNum);
+}
 
 // ===== ТЕМА =====
 const body = document.body;
 const themeToggle = document.getElementById('themeToggle');
+
 const savedTheme = localStorage.getItem('theme') || 'light';
 setTheme(savedTheme);
 
@@ -133,31 +115,18 @@ if (themeToggle) {
 function setTheme(theme) {
     body.classList.remove('theme-light', 'theme-dark');
     body.classList.add('theme-' + theme);
-    updateWaveColors(theme);
 }
-
-function updateWaveColors(theme) {
-    const path1 = document.querySelector('.wave-path-1');
-    const path2 = document.querySelector('.wave-path-2');
-    if (!path1 || !path2) return;
-    if (theme === 'light') {
-        path1.setAttribute('fill', 'rgba(237, 28, 36, 0.2)');
-        path2.setAttribute('fill', 'rgba(247, 148, 29, 0.3)');
-    } else {
-        path1.setAttribute('fill', 'rgba(120, 100, 255, 0.1)');
-        path2.setAttribute('fill', 'rgba(100, 200, 255, 0.15)');
-    }
-}
-updateWaveColors(savedTheme);
 
 // ===== БУРГЕР-МЕНЮ =====
 const burger = document.getElementById('burger');
 const nav = document.getElementById('nav');
+
 if (burger && nav) {
     burger.addEventListener('click', () => {
         burger.classList.toggle('active');
         nav.classList.toggle('active');
     });
+
     nav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             burger.classList.remove('active');
@@ -170,7 +139,6 @@ if (burger && nav) {
 function createBubbles() {
     const container = document.getElementById('bubbles');
     if (!container) return;
-    container.innerHTML = ''; // Очищаем старые
     const count = 25;
     for (let i = 0; i < count; i++) {
         const bubble = document.createElement('div');
@@ -184,6 +152,7 @@ function createBubbles() {
         container.appendChild(bubble);
     }
 }
+createBubbles();
 
 // ===== ЗВЁЗДЫ =====
 const canvas = document.getElementById('starCanvas');
@@ -296,20 +265,34 @@ if (ctx) {
 // ===== TOAST =====
 const toast = document.getElementById('toast');
 let toastTimeout = null;
+
 function showToast(message) {
     if (!toast) return;
-    if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+    
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+    }
+    
     toast.textContent = message;
     toast.classList.remove('hide');
     toast.classList.add('show');
+    
     const duration = window.innerWidth <= 768 ? 2000 : 3000;
+    
     toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.add('hide');
-        setTimeout(() => { if (!toast.classList.contains('show')) toast.classList.remove('hide'); }, 500);
+        
+        setTimeout(() => {
+            if (!toast.classList.contains('show')) {
+                toast.classList.remove('hide');
+            }
+        }, 500);
     }, duration);
 }
 
+// Toast для "ОАО РЖД" (fake-tab)
 document.querySelectorAll('.fake-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
         e.preventDefault();
@@ -317,182 +300,20 @@ document.querySelectorAll('.fake-tab').forEach(tab => {
     });
 });
 
-// ===== TOGGLE КНОПКИ =====
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const targetSection = this.id.includes('Info') 
-            ? document.getElementById('infoSection' + this.id.replace('toggleInfo', ''))
-            : document.getElementById('chatInputSection' + this.id.replace('toggleChat', ''));
-        
-        if (targetSection) {
-            targetSection.classList.toggle('hidden-section');
-            this.classList.toggle('active');
-            if (this.id.includes('Info')) {
-                this.textContent = this.classList.contains('active') ? ' Скрыть информацию' : '👤 Показать информацию о председателе';
-            } else {
-                this.textContent = this.classList.contains('active') ? '💬 Скрыть' : ' Добавить сообщение';
-            }
-        }
-    });
-});
-
-// ===== СВЁРАЧИВАЕМЫЙ ТЕКСТ =====
-function toggleInfo(chatNum) {
-    const content = document.getElementById('infoContent' + chatNum);
-    const btn = content ? content.nextElementSibling : null;
-    if (!content || !btn) return;
-    
-    if (content.classList.contains('collapsed')) {
-        content.classList.remove('collapsed');
-        btn.textContent = 'Скрыть ↑';
-        setTimeout(() => content.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-    } else {
-        content.classList.add('collapsed');
-        btn.textContent = 'Показать ещё ↓';
-    }
-}
-
-// ==========================================
-// ===== ЛЕТАЮЩИЕ ИСТОРИИ И ВИДЖЕТ =========
-// ==========================================
-
-const chatToggleBtn = document.getElementById('chatToggleBtn');
-const chatWidget = document.getElementById('chatWidget');
-const closeChatBtn = document.getElementById('closeChatBtn');
-const sendWidgetBtn = document.getElementById('sendWidgetBtn');
-
-// 1. Открытие/закрытие виджета
-if (chatToggleBtn && chatWidget) {
-    chatToggleBtn.addEventListener('click', () => chatWidget.classList.toggle('hidden'));
-    if (closeChatBtn) closeChatBtn.addEventListener('click', () => chatWidget.classList.add('hidden'));
-}
-
-// 2. Отправка истории из виджета в выбранный профсоюз
-if (sendWidgetBtn) {
-    sendWidgetBtn.addEventListener('click', async () => {
-        const authorInput = document.getElementById('widgetAuthor');
-        const unionSelect = document.getElementById('widgetUnion');
-        const textInput = document.getElementById('widgetText');
-        
-        if (!authorInput || !unionSelect || !textInput) {
-            showToast('❌ Ошибка формы');
-            return;
-        }
-        
-        const author = authorInput.value.trim();
-        const unionId = unionSelect.value;
-        const text = textInput.value.trim();
-
-        if (!author) { showToast('️ Пожалуйста, введите ваше имя'); return; }
-        if (!unionId) { showToast('⚠️ Пожалуйста, выберите профсоюз'); return; }
-        if (!text) { showToast('️ Пожалуйста, напишите текст истории'); return; }
-
-        sendWidgetBtn.disabled = true;
-        sendWidgetBtn.textContent = 'Отправка...';
-
-        try {
-            // ОТПРАВЛЯЕМ В ПРАВИЛЬНУЮ КОЛЛЕКЦИЮ messages1, messages2 или messages3
-            await db.collection('messages' + unionId).add({
-                author: author,
-                text: text,
-                unionId: unionId,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            textInput.value = '';
-            showToast('✅ История успешно добавлена!');
-            chatWidget.classList.add('hidden');
-        } catch (error) {
-            console.error('Ошибка:', error);
-            showToast('❌ Ошибка отправки');
-        } finally {
-            sendWidgetBtn.disabled = false;
-            sendWidgetBtn.textContent = 'Отправить историю';
-        }
-    });
-}
-
-// 3. Система летающих сообщений в реальном времени
-const floatingContainer = document.getElementById('floating-messages-container');
-const unionNames = { '1': 'ППО ДИТС', '2': 'ППО Управления', '3': 'ППО Движения' };
-
-function spawnFloatingMessage(data) {
-    if (!floatingContainer) return;
-    
-    // Проверяем, что сообщение свежее (не старше 15 секунд)
-    if (data.timestamp) {
-        const msgTime = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-        if ((Date.now() - msgTime.getTime()) > 15000) return;
-    }
-
-    const el = document.createElement('div');
-    const isDark = body.classList.contains('theme-dark');
-    const unionId = data.unionId || '1';
-    const unionName = unionNames[unionId] || 'Профсоюз';
-    const author = escapeHtml(data.author || 'Не указано');
-    const text = escapeHtml(data.text || '');
-
-    if (isDark) {
-        // Тёмная тема: Пузырьки
-        el.className = 'floating-bubble-msg';
-        el.style.left = Math.random() * 80 + 10 + '%';
-        el.style.animationDuration = (Math.random() * 10 + 12) + 's';
-        el.innerHTML = `
-            <div class="fb-author">👤 ${author}</div>
-            <div class="fb-union">🚇 ${unionName}</div>
-            <div class="fb-text">${text}</div>
-        `;
-    } else {
-        // Светлая тема: Геометрические фигуры
-        const shapes = ['fb-shape-circle', 'fb-shape-square', 'fb-shape-diamond', 'fb-shape-rect'];
-        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-        el.className = `floating-geo-msg ${randomShape}`;
-        el.style.left = Math.random() * 80 + 10 + '%';
-        el.style.animationDuration = (Math.random() * 8 + 10) + 's';
-        el.innerHTML = `
-            <div class="fb-content">
-                <div class="fb-author"> ${author}</div>
-                <div class="fb-union">🚇 ${unionName}</div>
-                <div class="fb-text">${text}</div>
-            </div>
-        `;
-    }
-
-    floatingContainer.appendChild(el);
-
-    setTimeout(() => {
-        if (el.parentNode) el.parentNode.removeChild(el);
-    }, 25000);
-}
-
-// Слушаем все 3 коллекции
-['1', '2', '3'].forEach(chatNum => {
-    db.collection('messages' + chatNum)
-      .orderBy('timestamp', 'desc')
-      .limit(1)
-      .onSnapshot((snapshot) => {
-          if (!snapshot.empty) {
-              const doc = snapshot.docs[0];
-              const data = doc.data();
-              data.unionId = chatNum;
-              spawnFloatingMessage(data);
-          }
-      });
-});
-
 // ===== EMOJI PICKER =====
 const emojiData = {
-    frequent: ['😊', '😂', '❤️', '👍', '🙏', '✨', '🎉', '', '💪', '👏', '✅', '⭐'],
-    smileys: ['😀', '😃', '😄', '', '😆', '😅', '', '😂', '🙂', '😊', '😇', '😍', '', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '', '🤭', '🤫', '🤔', '🤐', '', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮💨', '🤥', '😌', '😔', '😪', '', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '', '🥶', '🥴', '😵', '🤯', '', '🥳', '🥸', '😎', '🤓', ''],
-    gestures: ['👋', '🤚', '🖐️', '✋', '🖖', '', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '', '👈', '', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '', '👐', '🤲', '🤝', '🙏', '', '🤳', '💪'],
-    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
-    objects: ['🎁', '🎀', '🥇', '', '📝', '📋', '📁', '📂', '✉️', '📧', '', '📤', '🖥️', '⏰', '📅', '🗓️', '🔔', '', '📣', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '🏢', '️', '🎯', '🚀', '✨', '💫', '🌟', '⭐', '🎊', '']
+    frequent: ['😊', '😂', '❤️', '👍', '🙏', '✨', '🎉', '🔥', '💪', '👏', '✅', '⭐'],
+    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😊', '😇', '😍', '🤩', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
+    gestures: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '💅', '🤳', '💪'],
+    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
+    objects: ['🎁', '🎀', '🥇', '🏆', '📝', '📋', '📁', '📂', '✉️', '📧', '📩', '📤', '🖥️', '⏰', '📅', '🗓️', '🔔', '📢', '📣', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '🏢', '🏛️', '🎯', '🚀', '✨', '💫', '🌟', '⭐', '🎊', '🎉']
 };
 
 let currentEmojiTarget = null;
 const emojiPopup = document.getElementById('emojiPopup');
 const emojiSearch = document.getElementById('emojiSearch');
 
+// Заполняем эмодзи
 function fillEmojiGrid(containerId, emojis) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -501,7 +322,9 @@ function fillEmojiGrid(containerId, emojis) {
         const item = document.createElement('span');
         item.className = 'emoji-item';
         item.textContent = emoji;
-        item.addEventListener('click', () => insertEmoji(emoji));
+        item.addEventListener('click', () => {
+            insertEmoji(emoji);
+        });
         container.appendChild(item);
     });
 }
@@ -514,6 +337,7 @@ if (emojiPopup) {
     fillEmojiGrid('emojiObjects', emojiData.objects);
 }
 
+// Вставка эмодзи в textarea
 function insertEmoji(emoji) {
     if (!currentEmojiTarget) return;
     const textarea = currentEmojiTarget;
@@ -525,28 +349,37 @@ function insertEmoji(emoji) {
     textarea.focus();
 }
 
+// Кнопки открытия emoji popup
 document.querySelectorAll('.emoji-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const chatNum = btn.dataset.chat;
         const textarea = document.getElementById('messageInput' + chatNum);
+        
         if (!textarea || !emojiPopup) return;
+        
+        // Если popup уже открыт для этого чата — закрываем
         if (emojiPopup.classList.contains('active') && currentEmojiTarget === textarea) {
             emojiPopup.classList.remove('active');
             currentEmojiTarget = null;
             return;
         }
+        
         currentEmojiTarget = textarea;
+        
+        // Позиционируем popup рядом с кнопкой
         const rect = btn.getBoundingClientRect();
         emojiPopup.style.position = 'fixed';
         emojiPopup.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
         emojiPopup.style.left = Math.max(10, rect.left - 140) + 'px';
         emojiPopup.style.top = 'auto';
+        
         emojiPopup.classList.add('active');
-        if (emojiSearch) emojiSearch.value = '';
+        emojiSearch.value = '';
     });
 });
 
+// Закрытие popup при клике вне его
 document.addEventListener('click', (e) => {
     if (!emojiPopup || !currentEmojiTarget) return;
     if (!emojiPopup.contains(e.target) && !e.target.classList.contains('emoji-btn')) {
@@ -555,6 +388,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Закрытие по Escape
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && emojiPopup) {
         emojiPopup.classList.remove('active');
@@ -562,5 +396,202 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Инициализация пузырьков при загрузке
-createBubbles();
+// ===== СВЁРАЧИВАЕМЫЙ ТЕКСТ =====
+function toggleInfo(chatNum) {
+    const content = document.getElementById('infoContent' + chatNum);
+    const btn = content.nextElementSibling;
+    
+    if (content.classList.contains('collapsed')) {
+        // Раскрываем
+        content.classList.remove('collapsed');
+        btn.textContent = 'Скрыть ↑';
+        
+        // Плавная прокрутка к раскрытому тексту
+        setTimeout(() => {
+            content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    } else {
+        // Сворачиваем
+        content.classList.add('collapsed');
+        btn.textContent = 'Показать ещё ↓';
+    }
+}
+
+// ===== ОТПРАВКА СООБЩЕНИЙ (для страниц чатов) =====
+document.querySelectorAll('.btn-send').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const chatNum = btn.dataset.chat;
+        const input = document.getElementById('messageInput' + chatNum);
+        const authorInput = document.getElementById('authorInput' + chatNum);
+        const text = input.value.trim();
+
+        if (!text) {
+            showToast('Пожалуйста, введите сообщение');
+            return;
+        }
+
+        const author = authorInput ? authorInput.value.trim() : '';
+
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+
+        const result = await sendMessageToFirebase(chatNum, text, author);
+
+        if (result.success) {
+            input.value = '';
+            setTimeout(() => {
+                showToast('✅ Сообщение отправлено!');
+            }, 300);
+        } else {
+            showToast('❌ Ошибка отправки');
+        }
+
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+});
+
+// ===== TOGGLE КНОПКИ (для страниц чатов) =====
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const targetId = this.id.replace('toggle', 'infoSection').replace('toggle', 'chatInputSection');
+        let targetSection;
+        
+        if (this.id.includes('Info')) {
+            targetSection = document.getElementById('infoSection' + this.id.replace('toggleInfo', ''));
+        } else if (this.id.includes('Chat')) {
+            targetSection = document.getElementById('chatInputSection' + this.id.replace('toggleChat', ''));
+        }
+        
+        if (targetSection) {
+            targetSection.classList.toggle('hidden-section');
+            this.classList.toggle('active');
+            
+            if (this.id.includes('Info')) {
+                this.textContent = this.classList.contains('active') ? '👤 Скрыть информацию' : '👤 Показать информацию о председателе';
+            } else if (this.id.includes('Chat')) {
+                this.textContent = this.classList.contains('active') ? '💬 Скрыть' : '💬 Добавить сообщение';
+            }
+        }
+    });
+});
+
+// ===== ПЛАВАЮЩИЙ ЧАТ ИСТОРИЙ =====
+const chatToggleBtn = document.getElementById('chatToggleBtn');
+const chatWidget = document.getElementById('chatWidget');
+const closeChatBtn = document.getElementById('closeChatBtn');
+const chatWidgetMessages = document.getElementById('chatWidgetMessages');
+const widgetAuthor = document.getElementById('widgetAuthor');
+const widgetText = document.getElementById('widgetText');
+const sendWidgetBtn = document.getElementById('sendWidgetBtn');
+const newMsgBadge = document.getElementById('newMsgBadge');
+
+let isChatOpen = false;
+let previousMessageCount = 0;
+
+// 1. Открытие/закрытие виджета
+chatToggleBtn.addEventListener('click', () => {
+    isChatOpen = !isChatOpen;
+    if (isChatOpen) {
+        chatWidget.classList.remove('hidden');
+        newMsgBadge.classList.add('hidden'); // Сбрасываем счётчик при открытии
+        newMsgBadge.textContent = '0';
+        // Прокрутка вниз при открытии
+        setTimeout(() => {
+            chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
+        }, 100);
+    } else {
+        chatWidget.classList.add('hidden');
+    }
+});
+
+closeChatBtn.addEventListener('click', () => {
+    isChatOpen = false;
+    chatWidget.classList.add('hidden');
+});
+
+// 2. Загрузка и прослушивание историй из Firebase (в реальном времени)
+const storiesCollection = db.collection('union_stories');
+
+storiesCollection.orderBy('timestamp', 'asc').onSnapshot((snapshot) => {
+    if (snapshot.empty) {
+        chatWidgetMessages.innerHTML = '<div class="loading-spinner">Пока нет историй. Будьте первым!</div>';
+        previousMessageCount = 0;
+        return;
+    }
+
+    // Проверяем, появились ли новые сообщения
+    const currentCount = snapshot.size;
+    if (currentCount > previousMessageCount && previousMessageCount !== 0) {
+        // Новое сообщение пришло!
+        if (!isChatOpen) {
+            const newCount = currentCount - previousMessageCount;
+            newMsgBadge.textContent = newCount > 9 ? '9+' : newCount;
+            newMsgBadge.classList.remove('hidden');
+            
+            // Показываем тост-уведомление (функция showToast должна быть у тебя в коде)
+            if (typeof showToast === 'function') {
+                showToast('🔔 У вас новая история в чате!');
+            }
+        }
+    }
+    previousMessageCount = currentCount;
+
+    // Рендерим сообщения
+    chatWidgetMessages.innerHTML = '';
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const author = data.author || 'Аноним';
+        const text = data.text || '';
+        const timeStr = data.timestamp ? formatTimestamp(data.timestamp) : '';
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'widget-message';
+        msgDiv.innerHTML = `
+            <div class="widget-msg-author">👤 ${escapeHtml(author)}</div>
+            <div class="widget-msg-text">${escapeHtml(text)}</div>
+            ${timeStr ? `<div class="widget-msg-time">${timeStr}</div>` : ''}
+        `;
+        chatWidgetMessages.appendChild(msgDiv);
+    });
+
+    // Если чат открыт, автопрокрутка вниз
+    if (isChatOpen) {
+        chatWidgetMessages.scrollTop = chatWidgetMessages.scrollHeight;
+    }
+}, (error) => {
+    console.error('Ошибка загрузки историй:', error);
+    chatWidgetMessages.innerHTML = '<div class="loading-spinner">⚠️ Ошибка загрузки</div>';
+});
+
+// 3. Отправка новой истории
+sendWidgetBtn.addEventListener('click', async () => {
+    const text = widgetText.value.trim();
+    if (!text) {
+        if (typeof showToast === 'function') showToast('Пожалуйста, напишите текст истории');
+        return;
+    }
+
+    const author = widgetAuthor.value.trim() || 'Аноним';
+    
+    sendWidgetBtn.disabled = true;
+    sendWidgetBtn.textContent = 'Отправка...';
+
+    try {
+        await storiesCollection.add({
+            author: author,
+            text: text,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        widgetText.value = ''; // Очищаем только текст, имя оставляем
+        if (typeof showToast === 'function') showToast('✅ Ваша история добавлена!');
+    } catch (error) {
+        console.error('Ошибка отправки:', error);
+        if (typeof showToast === 'function') showToast('❌ Ошибка отправки');
+    } finally {
+        sendWidgetBtn.disabled = false;
+        sendWidgetBtn.textContent = 'Отправить';
+    }
+});
