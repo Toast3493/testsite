@@ -101,7 +101,7 @@ document.querySelectorAll('.btn-send').forEach(btn => {
         try {
             await db.collection('messages' + chatNum).add({
                 text: text,
-                author: author, // Больше никакого "Анонима" по умолчанию
+                author: author,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             input.value = '';
@@ -133,7 +133,22 @@ if (themeToggle) {
 function setTheme(theme) {
     body.classList.remove('theme-light', 'theme-dark');
     body.classList.add('theme-' + theme);
+    updateWaveColors(theme);
 }
+
+function updateWaveColors(theme) {
+    const path1 = document.querySelector('.wave-path-1');
+    const path2 = document.querySelector('.wave-path-2');
+    if (!path1 || !path2) return;
+    if (theme === 'light') {
+        path1.setAttribute('fill', 'rgba(237, 28, 36, 0.2)');
+        path2.setAttribute('fill', 'rgba(247, 148, 29, 0.3)');
+    } else {
+        path1.setAttribute('fill', 'rgba(120, 100, 255, 0.1)');
+        path2.setAttribute('fill', 'rgba(100, 200, 255, 0.15)');
+    }
+}
+updateWaveColors(savedTheme);
 
 // ===== БУРГЕР-МЕНЮ =====
 const burger = document.getElementById('burger');
@@ -149,6 +164,133 @@ if (burger && nav) {
             nav.classList.remove('active');
         });
     });
+}
+
+// ===== ПУЗЫРЬКИ =====
+function createBubbles() {
+    const container = document.getElementById('bubbles');
+    if (!container) return;
+    container.innerHTML = ''; // Очищаем старые
+    const count = 25;
+    for (let i = 0; i < count; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        const size = Math.random() * 40 + 10;
+        bubble.style.width = size + 'px';
+        bubble.style.height = size + 'px';
+        bubble.style.left = Math.random() * 100 + '%';
+        bubble.style.animationDuration = (Math.random() * 10 + 8) + 's';
+        bubble.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(bubble);
+    }
+}
+
+// ===== ЗВЁЗДЫ =====
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+function resize() {
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+if (ctx) {
+    class Star {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height - canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speed = Math.random() * 1.5 + 0.3;
+            this.opacity = Math.random() * 0.8 + 0.2;
+            this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+            this.twinklePhase = Math.random() * Math.PI * 2;
+            const colors = [[120,100,255],[100,200,255],[255,130,200],[255,255,255]];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        update() {
+            this.y += this.speed;
+            this.twinklePhase += this.twinkleSpeed;
+            this.currentOpacity = this.opacity * (0.5 + 0.5 * Math.sin(this.twinklePhase));
+            if (this.y > canvas.height + 10) { this.reset(); this.y = -10; }
+        }
+        draw() {
+            const [r, g, b] = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.currentOpacity})`;
+            ctx.fill();
+            if (this.size > 1) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.currentOpacity * 0.15})`;
+                ctx.fill();
+            }
+        }
+    }
+
+    class ShootingStar {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height * 0.5;
+            this.length = Math.random() * 80 + 40;
+            this.speed = Math.random() * 8 + 6;
+            this.angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3;
+            this.opacity = 1;
+            this.life = 0;
+            this.maxLife = Math.random() * 40 + 20;
+            this.active = false;
+        }
+        activate() { this.reset(); this.active = true; }
+        update() {
+            if (!this.active) return;
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+            this.life++;
+            this.opacity = 1 - this.life / this.maxLife;
+            if (this.life >= this.maxLife) this.active = false;
+        }
+        draw() {
+            if (!this.active) return;
+            const tailX = this.x - Math.cos(this.angle) * this.length;
+            const tailY = this.y - Math.sin(this.angle) * this.length;
+            const gradient = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+            gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+            gradient.addColorStop(1, `rgba(255, 255, 255, ${this.opacity})`);
+            ctx.beginPath();
+            ctx.moveTo(tailX, tailY);
+            ctx.lineTo(this.x, this.y);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+            ctx.fill();
+        }
+    }
+
+    const stars = Array.from({ length: 150 }, () => new Star());
+    const shootingStars = Array.from({ length: 3 }, () => new ShootingStar());
+    let shootingTimer = 0;
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => { s.update(); s.draw(); });
+        shootingTimer++;
+        if (shootingTimer > 120 + Math.random() * 200) {
+            const inactive = shootingStars.find(s => !s.active);
+            if (inactive) inactive.activate();
+            shootingTimer = 0;
+        }
+        shootingStars.forEach(s => { s.update(); s.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
 }
 
 // ===== TOAST =====
@@ -186,9 +328,9 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
             targetSection.classList.toggle('hidden-section');
             this.classList.toggle('active');
             if (this.id.includes('Info')) {
-                this.textContent = this.classList.contains('active') ? '👤 Скрыть информацию' : '👤 Показать информацию о председателе';
+                this.textContent = this.classList.contains('active') ? ' Скрыть информацию' : '👤 Показать информацию о председателе';
             } else {
-                this.textContent = this.classList.contains('active') ? '💬 Скрыть' : '💬 Добавить сообщение';
+                this.textContent = this.classList.contains('active') ? '💬 Скрыть' : ' Добавить сообщение';
             }
         }
     });
@@ -197,7 +339,7 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
 // ===== СВЁРАЧИВАЕМЫЙ ТЕКСТ =====
 function toggleInfo(chatNum) {
     const content = document.getElementById('infoContent' + chatNum);
-    const btn = content.nextElementSibling;
+    const btn = content ? content.nextElementSibling : null;
     if (!content || !btn) return;
     
     if (content.classList.contains('collapsed')) {
@@ -211,7 +353,7 @@ function toggleInfo(chatNum) {
 }
 
 // ==========================================
-// ===== НОВОЕ: ЛЕТАЮЩИЕ ИСТОРИИ И ВИДЖЕТ ===
+// ===== ЛЕТАЮЩИЕ ИСТОРИИ И ВИДЖЕТ =========
 // ==========================================
 
 const chatToggleBtn = document.getElementById('chatToggleBtn');
@@ -222,32 +364,42 @@ const sendWidgetBtn = document.getElementById('sendWidgetBtn');
 // 1. Открытие/закрытие виджета
 if (chatToggleBtn && chatWidget) {
     chatToggleBtn.addEventListener('click', () => chatWidget.classList.toggle('hidden'));
-    closeChatBtn.addEventListener('click', () => chatWidget.classList.add('hidden'));
+    if (closeChatBtn) closeChatBtn.addEventListener('click', () => chatWidget.classList.add('hidden'));
 }
 
 // 2. Отправка истории из виджета в выбранный профсоюз
 if (sendWidgetBtn) {
     sendWidgetBtn.addEventListener('click', async () => {
-        const author = document.getElementById('widgetAuthor').value.trim();
-        const unionId = document.getElementById('widgetUnion').value;
-        const text = document.getElementById('widgetText').value.trim();
+        const authorInput = document.getElementById('widgetAuthor');
+        const unionSelect = document.getElementById('widgetUnion');
+        const textInput = document.getElementById('widgetText');
+        
+        if (!authorInput || !unionSelect || !textInput) {
+            showToast('❌ Ошибка формы');
+            return;
+        }
+        
+        const author = authorInput.value.trim();
+        const unionId = unionSelect.value;
+        const text = textInput.value.trim();
 
-        if (!author) { showToast('⚠️ Пожалуйста, введите ваше имя'); return; }
+        if (!author) { showToast('️ Пожалуйста, введите ваше имя'); return; }
         if (!unionId) { showToast('⚠️ Пожалуйста, выберите профсоюз'); return; }
-        if (!text) { showToast('⚠️ Пожалуйста, напишите текст истории'); return; }
+        if (!text) { showToast('️ Пожалуйста, напишите текст истории'); return; }
 
         sendWidgetBtn.disabled = true;
         sendWidgetBtn.textContent = 'Отправка...';
 
         try {
+            // ОТПРАВЛЯЕМ В ПРАВИЛЬНУЮ КОЛЛЕКЦИЮ messages1, messages2 или messages3
             await db.collection('messages' + unionId).add({
                 author: author,
                 text: text,
-                unionId: unionId, // Сохраняем ID для отображения
+                unionId: unionId,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            document.getElementById('widgetText').value = '';
+            textInput.value = '';
             showToast('✅ История успешно добавлена!');
             chatWidget.classList.add('hidden');
         } catch (error) {
@@ -267,7 +419,7 @@ const unionNames = { '1': 'ППО ДИТС', '2': 'ППО Управления',
 function spawnFloatingMessage(data) {
     if (!floatingContainer) return;
     
-    // Проверяем, что сообщение свежее (не старше 15 секунд), чтобы не спамить при загрузке страницы
+    // Проверяем, что сообщение свежее (не старше 15 секунд)
     if (data.timestamp) {
         const msgTime = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
         if ((Date.now() - msgTime.getTime()) > 15000) return;
@@ -275,15 +427,16 @@ function spawnFloatingMessage(data) {
 
     const el = document.createElement('div');
     const isDark = body.classList.contains('theme-dark');
-    const unionName = unionNames[data.unionId] || 'Профсоюз';
+    const unionId = data.unionId || '1';
+    const unionName = unionNames[unionId] || 'Профсоюз';
     const author = escapeHtml(data.author || 'Не указано');
     const text = escapeHtml(data.text || '');
 
     if (isDark) {
         // Тёмная тема: Пузырьки
         el.className = 'floating-bubble-msg';
-        el.style.left = Math.random() * 80 + 10 + '%'; // Случайная позиция по горизонтали
-        el.style.animationDuration = (Math.random() * 10 + 12) + 's'; // Случайная скорость
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.animationDuration = (Math.random() * 10 + 12) + 's';
         el.innerHTML = `
             <div class="fb-author">👤 ${author}</div>
             <div class="fb-union">🚇 ${unionName}</div>
@@ -298,7 +451,7 @@ function spawnFloatingMessage(data) {
         el.style.animationDuration = (Math.random() * 8 + 10) + 's';
         el.innerHTML = `
             <div class="fb-content">
-                <div class="fb-author">👤 ${author}</div>
+                <div class="fb-author"> ${author}</div>
                 <div class="fb-union">🚇 ${unionName}</div>
                 <div class="fb-text">${text}</div>
             </div>
@@ -307,34 +460,33 @@ function spawnFloatingMessage(data) {
 
     floatingContainer.appendChild(el);
 
-    // Удаляем элемент после завершения анимации, чтобы не засорять DOM
     setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
     }, 25000);
 }
 
-// Слушаем все 3 коллекции на наличие новых сообщений
+// Слушаем все 3 коллекции
 ['1', '2', '3'].forEach(chatNum => {
     db.collection('messages' + chatNum)
       .orderBy('timestamp', 'desc')
-      .limit(1) // Берем только последнее сообщение
+      .limit(1)
       .onSnapshot((snapshot) => {
           if (!snapshot.empty) {
               const doc = snapshot.docs[0];
               const data = doc.data();
-              data.unionId = chatNum; // Добавляем ID профсоюза для отображения
+              data.unionId = chatNum;
               spawnFloatingMessage(data);
           }
       });
 });
 
-// ===== EMOJI PICKER (без изменений, работает как раньше) =====
+// ===== EMOJI PICKER =====
 const emojiData = {
-    frequent: ['😊', '😂', '❤️', '👍', '🙏', '✨', '🎉', '🔥', '💪', '👏', '✅', '⭐'],
-    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😊', '😇', '😍', '🤩', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
-    gestures: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '💅', '🤳', '💪'],
-    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
-    objects: ['🎁', '🎀', '🥇', '🏆', '📝', '📋', '📁', '📂', '✉️', '📧', '📩', '📤', '🖥️', '⏰', '📅', '🗓️', '🔔', '📢', '📣', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '🏢', '🏛️', '🎯', '🚀', '✨', '💫', '🌟', '⭐', '🎊', '🎉']
+    frequent: ['😊', '😂', '❤️', '👍', '🙏', '✨', '🎉', '', '💪', '👏', '✅', '⭐'],
+    smileys: ['😀', '😃', '😄', '', '😆', '😅', '', '😂', '🙂', '😊', '😇', '😍', '', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '', '🤭', '🤫', '🤔', '🤐', '', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮💨', '🤥', '😌', '😔', '😪', '', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '', '🥶', '🥴', '😵', '🤯', '', '🥳', '🥸', '😎', '🤓', ''],
+    gestures: ['👋', '🤚', '🖐️', '✋', '🖖', '', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '', '👈', '', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '', '👐', '🤲', '🤝', '🙏', '', '🤳', '💪'],
+    hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
+    objects: ['🎁', '🎀', '🥇', '', '📝', '📋', '📁', '📂', '✉️', '📧', '', '📤', '🖥️', '⏰', '📅', '🗓️', '🔔', '', '📣', '🔊', '🔋', '🔧', '⚙️', '🛡️', '⚖️', '🔑', '🏠', '🏢', '️', '🎯', '🚀', '✨', '💫', '🌟', '⭐', '🎊', '']
 };
 
 let currentEmojiTarget = null;
@@ -409,3 +561,6 @@ document.addEventListener('keydown', (e) => {
         currentEmojiTarget = null;
     }
 });
+
+// Инициализация пузырьков при загрузке
+createBubbles();
