@@ -518,20 +518,19 @@ if (sendWidgetBtn) {
 }
 
 // ==========================================
-// ===== ЛЕТАЮЩИЕ СООБЩЕНИЯ (НОВОЕ) =====
+// ===== ЛЕТАЮЩИЕ СООБЩЕНИЯ (ПОСТОЯННЫЙ ПОКАЗ) =====
 // ==========================================
 
 const floatingContainer = document.getElementById('floating-messages-container');
 const unionNames = { '1': 'ППО ДИТС', '2': 'ППО Управления', '3': 'ППО Движения' };
 
+// Хранилище всех сообщений
+let allMessages = [];
+let messageIndex = 0;
+let showInterval = null;
+
 function spawnFloatingMessage(data) {
     if (!floatingContainer) return;
-
-    // Проверяем, что сообщение свежее (не старше 15 секунд), чтобы не спамить при загрузке
-    if (data.timestamp) {
-        const msgTime = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-        if ((Date.now() - msgTime.getTime()) > 15000) return;
-    }
 
     const el = document.createElement('div');
     const isDark = body.classList.contains('theme-dark');
@@ -559,7 +558,7 @@ function spawnFloatingMessage(data) {
         el.style.animationDuration = (Math.random() * 8 + 10) + 's';
         el.innerHTML = `
             <div class="fb-content">
-                <div class="fb-author"> ${author}</div>
+                <div class="fb-author">👤 ${author}</div>
                 <div class="fb-union">🚇 ${unionName}</div>
                 <div class="fb-text">${text}</div>
             </div>
@@ -574,17 +573,53 @@ function spawnFloatingMessage(data) {
     }, 25000);
 }
 
-// Слушаем все 3 коллекции на наличие новых сообщений
-['1', '2', '3'].forEach(chatNum => {
-    db.collection('messages' + chatNum)
-      .orderBy('timestamp', 'desc')
-      .limit(1)
-      .onSnapshot((snapshot) => {
-          if (!snapshot.empty) {
-              const doc = snapshot.docs[0];
-              const data = doc.data();
-              data.unionId = chatNum;
-              spawnFloatingMessage(data);
-          }
-      });
-});
+// Показывать следующее сообщение
+function showNextMessage() {
+    if (allMessages.length === 0) return;
+    
+    const data = allMessages[messageIndex];
+    spawnFloatingMessage(data);
+    
+    messageIndex = (messageIndex + 1) % allMessages.length;
+}
+
+// Загружаем все сообщения из всех коллекций
+function loadAllMessages() {
+    ['1', '2', '3'].forEach(chatNum => {
+        db.collection('messages' + chatNum)
+          .orderBy('timestamp', 'asc')
+          .onSnapshot((snapshot) => {
+              if (!snapshot.empty) {
+                  snapshot.forEach(doc => {
+                      const data = doc.data();
+                      data.unionId = chatNum;
+                      
+                      // Проверяем, есть ли уже это сообщение
+                      const exists = allMessages.some(msg => 
+                          msg.text === data.text && msg.author === data.author
+                      );
+                      
+                      if (!exists) {
+                          allMessages.push(data);
+                      }
+                  });
+              }
+          });
+    });
+}
+
+// Запускаем показ сообщений каждые 8 секунд
+function startMessageShow() {
+    loadAllMessages();
+    
+    // Первое сообщение через 2 секунды
+    setTimeout(() => {
+        showNextMessage();
+        
+        // Дальше каждые 8 секунд
+        showInterval = setInterval(showNextMessage, 8000);
+    }, 2000);
+}
+
+// Запускаем
+startMessageShow();
