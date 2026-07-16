@@ -161,6 +161,30 @@
 
 <div class="toast" id="toast"></div>
 
+    <!-- ===== ПЛАВАЮЩИЙ ВИДЖЕТ ИСТОРИЙ ===== -->
+    <!-- Кнопка открытия -->
+    <button id="chatToggleBtn" class="chat-toggle-btn" title="Читать и делиться историями">
+        💬 Истории <span id="newMsgBadge" class="msg-badge hidden">0</span>
+    </button>
+
+    <!-- Окно чата -->
+    <div id="chatWidget" class="chat-widget hidden">
+        <div class="chat-widget-header">
+            <span>📖 Истории профсоюза</span>
+            <button id="closeChatBtn" class="close-chat-btn">✕</button>
+        </div>
+        
+        <div class="chat-widget-messages" id="chatWidgetMessages">
+            <div class="loading-spinner">Загрузка историй...</div>
+        </div>
+        
+        <div class="chat-widget-input">
+            <input type="text" id="widgetAuthor" placeholder="Ваше имя (или Аноним)" maxlength="30">
+            <textarea id="widgetText" placeholder="Поделитесь своей историей..." rows="2"></textarea>
+            <button id="sendWidgetBtn" class="send-widget-btn">Отправить</button>
+        </div>
+    </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
