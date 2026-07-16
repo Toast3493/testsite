@@ -2808,3 +2808,270 @@ body.theme-dark .send-widget-btn {
         font-size: 14px;
     }
 }
+
+/* ========================================== */
+/* ===== ЛЕТАЮЩИЕ СООБЩЕНИЯ (НОВОЕ) ======== */
+/* ========================================== */
+
+/* Контейнер для летающих сообщений */
+#floating-messages-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Чтобы не мешал кликам по сайту */
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* ===== ТЁМНАЯ ТЕМА: ПУЗЫРЬКИ С ТЕКСТОМ ===== */
+.floating-bubble-msg {
+    position: absolute;
+    bottom: -200px;
+    width: 240px;
+    padding: 16px 18px;
+    background: rgba(120, 100, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(120, 100, 255, 0.35);
+    border-radius: 20px 20px 20px 4px;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: bubbleRise linear forwards;
+}
+
+.floating-bubble-msg .fb-author {
+    font-weight: 700;
+    color: #80d8ff;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.floating-bubble-msg .fb-union {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ff82c8;
+}
+
+.floating-bubble-msg .fb-text {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+@keyframes bubbleRise {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+    }
+    8% {
+        opacity: 1;
+    }
+    92% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-130vh) translateX(40px);
+        opacity: 0;
+    }
+}
+
+/* ===== СВЕТЛАЯ ТЕМА: ГЕОМЕТРИЧЕСКИЕ ФИГУРЫ ===== */
+.floating-geo-msg {
+    position: absolute;
+    padding: 20px;
+    color: #2d2d4a;
+    font-size: 13px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: geoFloat linear forwards;
+}
+
+.floating-geo-msg .fb-content {
+    z-index: 2;
+    position: relative;
+}
+
+.floating-geo-msg .fb-author {
+    font-weight: 700;
+    color: #ed1c24;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.floating-geo-msg .fb-union {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #f7941d;
+}
+
+.floating-geo-msg .fb-text {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Фигура: Круг */
+.floating-geo-msg.fb-shape-circle {
+    background: rgba(247, 148, 29, 0.18);
+    border: 2px solid rgba(247, 148, 29, 0.4);
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    box-shadow: 0 4px 20px rgba(247, 148, 29, 0.2);
+}
+
+/* Фигура: Квадрат со скруглением */
+.floating-geo-msg.fb-shape-square {
+    background: rgba(237, 28, 36, 0.12);
+    border: 2px solid rgba(237, 28, 36, 0.35);
+    border-radius: 24px;
+    width: 220px;
+    box-shadow: 0 4px 20px rgba(237, 28, 36, 0.15);
+}
+
+/* Фигура: Ромб (повёрнутый квадрат) */
+.floating-geo-msg.fb-shape-diamond {
+    background: rgba(190, 30, 45, 0.12);
+    border: 2px solid rgba(190, 30, 45, 0.35);
+    border-radius: 20px;
+    width: 210px;
+    height: 210px;
+    transform: rotate(15deg);
+    box-shadow: 0 4px 20px rgba(190, 30, 45, 0.15);
+}
+
+.floating-geo-msg.fb-shape-diamond .fb-content {
+    transform: rotate(-15deg); /* Выравниваем текст обратно */
+}
+
+/* Фигура: Прямоугольник */
+.floating-geo-msg.fb-shape-rect {
+    background: rgba(251, 176, 59, 0.18);
+    border: 2px solid rgba(251, 176, 59, 0.45);
+    border-radius: 16px;
+    width: 240px;
+    box-shadow: 0 4px 20px rgba(251, 176, 59, 0.2);
+}
+
+@keyframes geoFloat {
+    0% {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+    }
+    8% {
+        opacity: 1;
+    }
+    92% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-20vh) rotate(10deg);
+        opacity: 0;
+    }
+}
+
+/* Ромб имеет свою анимацию с учётом поворота */
+.floating-geo-msg.fb-shape-diamond {
+    animation-name: geoFloatDiamond;
+}
+
+@keyframes geoFloatDiamond {
+    0% {
+        transform: translateY(110vh) rotate(15deg);
+        opacity: 0;
+    }
+    8% {
+        opacity: 1;
+    }
+    92% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-20vh) rotate(25deg);
+        opacity: 0;
+    }
+}
+
+/* ===== SELECT В ВИДЖЕТЕ ИСТОРИЙ ===== */
+.chat-widget-input select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 36px;
+}
+
+body.theme-light .chat-widget-input select {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #2d2d4a;
+}
+
+body.theme-dark .chat-widget-input select {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+body.theme-light .chat-widget-input select:focus {
+    border-color: #ed1c24;
+}
+
+body.theme-dark .chat-widget-input select:focus {
+    border-color: #7864ff;
+}
+
+.chat-widget-input select option {
+    background: #fff;
+    color: #2d2d4a;
+}
+
+body.theme-dark .chat-widget-input select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+/* Адаптив для мобильных — летающие сообщения */
+@media (max-width: 768px) {
+    .floating-bubble-msg {
+        width: 200px;
+        padding: 12px 14px;
+        font-size: 12px;
+    }
+    
+    .floating-geo-msg.fb-shape-circle {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .floating-geo-msg.fb-shape-square,
+    .floating-geo-msg.fb-shape-rect {
+        width: 190px;
+    }
+    
+    .floating-geo-msg.fb-shape-diamond {
+        width: 170px;
+        height: 170px;
+    }
+}
